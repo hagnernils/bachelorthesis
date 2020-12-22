@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 project(bachelorthesis)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 
 add_library(libtinygltf INTERFACE)
 
@@ -22,6 +22,16 @@ include_directories(include)
 
 add_executable(bachelorthesis
     main.cpp
+    Scene.cpp
+    MeshObject.cpp
+    Primitive.cpp
+    Material.cpp
+    include/Float.h
+    include/Material.h
+    include/Matrix.h
+    include/Primitive.h
+    include/Ray.h
+    include/Scene.h
 )
 
 
