@@ -142,6 +142,7 @@
       "mesh": 31
     },
     {
+      "name": "rootNode",
       "children": [
         0,
         1,
