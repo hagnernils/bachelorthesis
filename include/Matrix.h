@@ -37,7 +37,6 @@ public:
                                                         const float qx,
                                                         const float qy,
                                                         const float qz);
-    void printTo(std::ostream &stream);
     T* getData() { return data; };
 };
 
@@ -86,14 +85,14 @@ Matrix<T, M, N>::Matrix(const std::initializer_list<T> &list) {
 }
 
 template<typename T, unsigned int M, unsigned int N>
-void Matrix<T, M, N>::printTo(std::ostream &stream) {
-
+std::ostream& operator<<(std::ostream &stream, Matrix<T, M, N> matrix) {
     stream << "{ ";
     for (unsigned int i = 0; i < M * N; i++)
     {
-        stream << data[i] << " ";
+        stream << matrix[i] << " ";
     }
     stream << " }" << std::endl;
+    return stream;
 }
 
 template<typename T, unsigned int M, unsigned int N>

@@ -41,9 +41,8 @@ BufferView<T> AccessorToBufferView(Scene& scene, const int accessorIndex, const 
 }
 
 
-
 void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, Matrix4x4 parentTransform) {
-    parentTransform.printTo(std::cerr);
+    std::cerr << "Parent transform is " << parentTransform;
 
     auto node = model.nodes[nodeIndex];
 
@@ -81,14 +80,9 @@ void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, M
             ? Matrix4x4::identity()
             : Matrix4x4(nodeMatrix.data()).transpose();
 
-    translation.printTo(std::cerr);
-    rotation.printTo(std::cerr);
-    scale.printTo(std::cerr);
-    matrix.printTo(std::cerr);
-
     Matrix4x4 fullTransform = parentTransform * matrix * translation * rotation * scale;
 
-    fullTransform.printTo(std::cerr);
+    std::cerr << "Full transform is " << fullTransform;
 
     // get indices, positions and normals of the mesh
     if (node.mesh != -1) {
