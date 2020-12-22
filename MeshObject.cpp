@@ -4,9 +4,12 @@
 
 #include "include/MeshObject.h"
 
+MeshObject::MeshObject() {
+    name = "MeshObject";
+    materialIndex = 0;
+}
 
-std::vector<Primitive> MeshObject::getPrimitives() {
-    int numPrims;
-    auto prims = std::vector<Primitive>(numPrims);
-    return prims;
+MeshObject::MeshObject(std::string name, size_t materialIndex) {
+    name = name;
+    materialIndex = materialIndex;
 }

@@ -6,24 +6,18 @@
 #define BACHELORTHESIS_SCENE_H
 #include <vector>
 #include <string>
+#include "Buffer.h"
 #include "Material.h"
 #include "Matrix.h"
-
-
-struct Buffer {
-    std::string name;
-    std::vector<unsigned char> data;
-};
-
+#include "MeshObject.h"
 
 class Scene {
 public:
-    std::vector<int> objects;
+    std::vector<MeshObject> objects;
     std::vector<Material> materials;
     void loadGLTF(const std::string& filename);
 
-private:
-    std::vector<Buffer> buffers;
+    std::vector<Buffer<u_char>> buffers;
 };
 
 

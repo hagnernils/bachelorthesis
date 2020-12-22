@@ -26,12 +26,14 @@ add_executable(bachelorthesis
     MeshObject.cpp
     Primitive.cpp
     Material.cpp
+    Buffer.cpp
     include/Float.h
     include/Material.h
     include/Matrix.h
     include/Primitive.h
     include/Ray.h
     include/Scene.h
+    include/Buffer.h
 )
 
 

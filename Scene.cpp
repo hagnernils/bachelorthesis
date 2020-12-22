@@ -7,12 +7,42 @@
 
 #include <iostream>
 #include <vector>
+#include <MeshObject.h>
 #include "tinygltf/tiny_gltf.h"
-#include "include/Scene.h"
-#include "include/Material.h"
+#include "Scene.h"
+#include "Material.h"
 #include "Matrix.h"
+#include "Buffer.h"
+#include "Buffer.cpp"
 
-void processNode(size_t nodeIndex, const tinygltf::Model &model, Matrix4x4 parentTransform) {
+template <typename T>
+BufferView<T> AccessorToBufferView(Scene& scene, const int accessorIndex, const tinygltf::Model& model) {
+    BufferView<T> bufferView;
+    if (accessorIndex == -1) {
+        std::cerr << "Invalid Accessor" << std::endl;
+        return bufferView;
+    }
+    auto accessor = model.accessors[accessorIndex];
+    auto gltfBufferView = model.bufferViews[accessor.bufferView];
+    bufferView.data = scene.buffers[gltfBufferView.buffer].data.begin();
+    bufferView.data += gltfBufferView.byteOffset;
+    bufferView.byteStride = gltfBufferView.byteStride;
+    bufferView.numElements = 0;
+    bufferView.elementSizeInBytes = sizeof(T);
+
+
+    bufferView.data += accessor.byteOffset;
+    bufferView.numElements = accessor.count;
+    bufferView.elementSizeInBytes = accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT ? 2 :
+                                    accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT   ? 4 :
+                                    accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT          ? 4 :
+                                    0;
+    return bufferView;
+}
+
+
+
+void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, Matrix4x4 parentTransform) {
     parentTransform.printTo(std::cerr);
 
     auto node = model.nodes[nodeIndex];
@@ -60,8 +90,38 @@ void processNode(size_t nodeIndex, const tinygltf::Model &model, Matrix4x4 paren
 
     fullTransform.printTo(std::cerr);
 
+    // get indices, positions and normals of the mesh
+    if (node.mesh != -1) {
+        auto& mesh = model.meshes[node.mesh];
+        std::cerr << "Mesh with name " << mesh.name << std::endl;
+        for (auto& primitive : mesh.primitives) {
+            std::cerr << "has indices accessor " << primitive.indices << std::endl << std::endl;
+
+            if (primitive.mode != TINYGLTF_MODE_TRIANGLES)
+                continue;
+
+            MeshObject meshObject;
+            meshObject.name = mesh.name;
+            meshObject.materialIndex = primitive.material;
+            meshObject.transform = fullTransform;
+
+            auto indicesBufferView = AccessorToBufferView<u_char>(scene, primitive.indices, model);
+            meshObject.indices.push_back(indicesBufferView);
+
+            auto positionAccessor = primitive.attributes.at("POSITION");
+            auto positionBufferView = AccessorToBufferView<u_char>(scene, positionAccessor, model);
+            meshObject.positions.push_back(positionBufferView);
+
+            auto normalsAccessor = primitive.attributes.at("NORMAL");
+            auto normalsBufferView = AccessorToBufferView<u_char>(scene, normalsAccessor, model);
+            meshObject.normals.push_back(normalsBufferView);
+
+            scene.objects.push_back(meshObject);
+        }
+    }
+
     for (auto childIndex : node.children) {
-        processNode(childIndex, model, fullTransform);
+        processNode(scene, childIndex, model, fullTransform);
     }
 }
 
@@ -81,8 +141,8 @@ void Scene::loadGLTF(const std::string& filename) {
     }
 
     // Save buffers to scene
-    for (const auto &buffer : model.buffers) {
-        buffers.emplace_back(Buffer{buffer.name, buffer.data});
+    for (const auto &b : model.buffers) {
+        buffers.emplace_back(Buffer<u_char>{b.name, b.data});
     }
 
     // Add materials
@@ -102,18 +162,13 @@ void Scene::loadGLTF(const std::string& filename) {
             std::cerr << "Using default black body material" << std::endl;
         }
 
-        std::cerr << "Material " << mat.name << std::endl
+        std::cerr << "Material " << mat.name << ":" << std::endl
                   << "Absorption " << mat.absorption
                   << " Specular Reflection " << mat.specularReflection
                   << " Diffuse Reflection " << mat.diffuseReflection
                   << std::endl;
 
         materials.push_back(mat);
-    }
-
-    for (const auto& node: model.nodes) {
-        std::cout << (node.name.empty() ? "noname" : node.name) << std::endl;
-        std::cout << node.children.size() << std::endl;
     }
 
     // filter out nodes not used as child = root node(s)
@@ -125,7 +180,7 @@ void Scene::loadGLTF(const std::string& filename) {
     // compute the object->world transforms of the nodes
     for (int i = 0; i < isRootNode.size(); i++) {
         if (isRootNode[i]) {
-            processNode(i, model, Matrix<float, 4, 4>::identity());
+            processNode(*this, i, model, Matrix<float, 4, 4>::identity());
         }
     }
 }
