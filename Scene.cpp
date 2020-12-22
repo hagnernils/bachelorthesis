@@ -106,6 +106,14 @@ void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, M
             auto positionBufferView = AccessorToBufferView<u_char>(scene, positionAccessor, model);
             meshObject.positions.push_back(positionBufferView);
 
+            // construct AABB
+            auto minValues = model.accessors[positionAccessor].minValues;
+            auto maxValues = model.accessors[positionAccessor].maxValues;
+            if (!minValues.empty() && !maxValues.empty())
+                meshObject.aabb = Aabb {Float3(minValues[0], minValues[1], minValues[2]),
+                                        Float3(maxValues[0], maxValues[1], maxValues[2])};
+
+
             auto normalsAccessor = primitive.attributes.at("NORMAL");
             auto normalsBufferView = AccessorToBufferView<u_char>(scene, normalsAccessor, model);
             meshObject.normals.push_back(normalsBufferView);

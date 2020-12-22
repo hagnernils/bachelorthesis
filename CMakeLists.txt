@@ -34,6 +34,7 @@ add_executable(bachelorthesis
     include/Ray.h
     include/Scene.h
     include/Buffer.h
+    include/Aabb.h
 )
 
 
