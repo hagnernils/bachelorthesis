@@ -18,7 +18,7 @@ target_sources(libtinygltf INTERFACE
 
 include(GNUInstallDirs)
 include_directories(include)
-
+add_subdirectory(test)
 
 add_executable(bachelorthesis
     main.cpp
