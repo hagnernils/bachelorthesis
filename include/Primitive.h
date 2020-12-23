@@ -2,8 +2,12 @@
 // Created by Nils Hagner on 20.12.20.
 //
 
-#pragma once
+#ifndef BACHELORTHESIS_PRIMITIVE_H
+#define BACHELORTHESIS_PRIMITIVE_H
+
 #include <memory>
+#include <utility>
+#include <ostream>
 #include "Ray.h"
 #include "Float.h"
 
@@ -20,11 +24,25 @@ struct hitRecord {
 class Primitive {
 public:
     Primitive();
-    bool hit(const Ray& ray, Float tMin, Float tMax, hitRecord& hitRecord);
+
+    Primitive(Float3 a, Float3 b, Float3 c, Float3 normal,
+              std::shared_ptr<MeshObject> parent)
+            : a(a), b(b), c(c),
+              normal(normal),
+              parent(std::move(
+                      parent)) {};
+
+    bool hit(const Ray &ray, Float tMin, Float tMax, hitRecord &hitRecord);
+
+    friend std::ostream &operator<<(std::ostream &stream, Primitive &prim);
+
     Float3 sampleArea();
+
     static Float3 sampleHemisphere();
-private:
+
     std::shared_ptr<MeshObject> parent;
     Float3 a, b, c;
     Float3 normal;
 };
+
+#endif //BACHELORTHESIS_PRIMITIVE_H

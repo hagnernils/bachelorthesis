@@ -20,3 +20,13 @@ Float3 Primitive::sampleArea() {
 Float3 Primitive::sampleHemisphere() {
     return Float3(0, 0, 0);
 }
+
+std::ostream &operator<<(std::ostream &stream, Primitive &prim) {
+    return stream << "Primitive {" << std::endl
+                  << "A: " << prim.a << std::endl
+                  << "B: " << prim.b << std::endl
+                  << "C: " << prim.c << std::endl
+                  << "Normal: " << prim.normal << std::endl
+                  << "Parent: " << prim.parent << std::endl
+                  << "}" << std::endl;
+}
