@@ -15,28 +15,24 @@
 #include "Buffer.h"
 #include "Buffer.cpp"
 
-template <typename T>
-BufferView<T> AccessorToBufferView(Scene& scene, const int accessorIndex, const tinygltf::Model& model) {
-    BufferView<T> bufferView;
+template<typename T>
+BufferView<T> AccessorToBufferView(Scene &scene, const int accessorIndex, const tinygltf::Model &model) {
     if (accessorIndex == -1) {
         std::cerr << "Invalid Accessor" << std::endl;
-        return bufferView;
+        return BufferView<T>();
     }
     auto accessor = model.accessors[accessorIndex];
     auto gltfBufferView = model.bufferViews[accessor.bufferView];
-    bufferView.data = scene.buffers[gltfBufferView.buffer].data.begin();
-    bufferView.data += gltfBufferView.byteOffset;
-    bufferView.byteStride = gltfBufferView.byteStride;
-    bufferView.numElements = 0;
-    bufferView.elementSizeInBytes = sizeof(T);
-
-
-    bufferView.data += accessor.byteOffset;
+    T *bufferBegin = reinterpret_cast<T *>(scene.buffers[gltfBufferView.buffer].data.data());
+    BufferView<T> bufferView(bufferBegin
+                             + gltfBufferView.byteOffset
+                             + accessor.byteOffset);
+    bufferView.byteStride = gltfBufferView.byteStride ? gltfBufferView.byteStride : 1;
     bufferView.numElements = accessor.count;
     bufferView.elementSizeInBytes = accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT ? 2 :
-                                    accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT   ? 4 :
-                                    accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT          ? 4 :
-                                    0;
+                                    accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT ? 4 :
+                                    accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT ? 4 :
+                                    sizeof(T);
     return bufferView;
 }
 
@@ -74,11 +70,11 @@ void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, M
 
     std::vector<float> nodeMatrix;
     std::transform(node.matrix.begin(), node.matrix.end(), nodeMatrix.begin(),
-                   [](double x){return static_cast<float>(x);});
+                   [](double x) { return static_cast<float>(x); });
 
     Matrix4x4 matrix = node.matrix.empty()
-            ? Matrix4x4::identity()
-            : Matrix4x4(nodeMatrix.data()).transpose();
+                       ? Matrix4x4::identity()
+                       : Matrix4x4(nodeMatrix.data()).transpose();
 
     Matrix4x4 fullTransform = parentTransform * matrix * translation * rotation * scale;
 
@@ -86,9 +82,9 @@ void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, M
 
     // get indices, positions and normals of the mesh
     if (node.mesh != -1) {
-        auto& mesh = model.meshes[node.mesh];
+        auto &mesh = model.meshes[node.mesh];
         std::cerr << "Mesh with name " << mesh.name << std::endl;
-        for (auto& primitive : mesh.primitives) {
+        for (auto &primitive : mesh.primitives) {
             std::cerr << "has indices accessor " << primitive.indices << std::endl << std::endl;
 
             if (primitive.mode != TINYGLTF_MODE_TRIANGLES)
@@ -103,20 +99,22 @@ void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, M
             meshObject.indices.push_back(indicesBufferView);
 
             auto positionAccessor = primitive.attributes.at("POSITION");
-            auto positionBufferView = AccessorToBufferView<u_char>(scene, positionAccessor, model);
+            auto positionBufferView = AccessorToBufferView<Float3>(scene, positionAccessor, model);
             meshObject.positions.push_back(positionBufferView);
 
             // construct AABB
             auto minValues = model.accessors[positionAccessor].minValues;
             auto maxValues = model.accessors[positionAccessor].maxValues;
             if (!minValues.empty() && !maxValues.empty())
-                meshObject.aabb = Aabb {Float3(minValues[0], minValues[1], minValues[2]),
-                                        Float3(maxValues[0], maxValues[1], maxValues[2])};
+                meshObject.aabb = Aabb{Float3(minValues[0], minValues[1], minValues[2]),
+                                       Float3(maxValues[0], maxValues[1], maxValues[2])};
 
 
             auto normalsAccessor = primitive.attributes.at("NORMAL");
-            auto normalsBufferView = AccessorToBufferView<u_char>(scene, normalsAccessor, model);
+            auto normalsBufferView = AccessorToBufferView<Float3>(scene, normalsAccessor, model);
             meshObject.normals.push_back(normalsBufferView);
+
+            assert(meshObject.positions.size() == meshObject.indices.size());
 
             scene.objects.push_back(meshObject);
         }
@@ -127,11 +125,12 @@ void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, M
     }
 }
 
-void Scene::loadGLTF(const std::string& filename) {
+void Scene::loadGLTF(const std::string &filename) {
     tinygltf::TinyGLTF loader;
     tinygltf::Model model;
     std::string error, warning;
 
+    // load model
     bool result = loader.LoadASCIIFromFile(&model, &error, &warning, filename);
     if (!result) {
         std::cerr << "Failed to load scene" << std::endl;

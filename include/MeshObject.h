@@ -19,8 +19,8 @@ public:
     Matrix4x4 transform;
     Aabb aabb;
     std::vector<BufferView<u_char>> indices;
-    std::vector<BufferView<u_char>> positions;
-    std::vector<BufferView<u_char>> normals;
+    std::vector<BufferView<Float3>> positions;
+    std::vector<BufferView<Float3>> normals;
 
     MeshObject();
 };

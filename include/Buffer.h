@@ -4,33 +4,35 @@
 
 #ifndef BACHELORTHESIS_BUFFER_H
 #define BACHELORTHESIS_BUFFER_H
+
 #include <string>
 #include <vector>
 
-template <typename T>
+template<typename T>
 struct Buffer {
     std::string name;
     std::vector<T> data;
 };
 typedef Buffer<u_char> ByteBuffer;
 
-template <typename T>
+template<typename T>
 struct BufferView {
     // Iterator that marks beginning of this buffer
-    typename std::vector<T>::const_iterator data;
-    uint32_t byteOffset;
-    uint32_t byteLength;
-    uint16_t byteStride;
-    size_t numElements;
-    size_t elementSizeInBytes;
+    T *const data = nullptr;
+    uint32_t byteLength = 0;
+    uint16_t byteStride = 1;
+    size_t numElements = 0;
+    size_t elementSizeInBytes = 0;
+
     BufferView();
-    explicit BufferView(typename std::vector<T>::const_iterator bufferBegin);
-    typename std::vector<T>::const_iterator begin() { return dataBegin; }
-private:
-    const typename std::vector<T>::const_iterator dataBegin;
+
+    explicit BufferView(T *bufferBegin);
+
+    const T *begin() { return data; }
+
+    bool isValid() { return data == nullptr; }
+
+    const T &operator[](size_t index) const;
 };
-
-
-
 
 #endif //BACHELORTHESIS_BUFFER_H
