@@ -14,7 +14,7 @@
 // forward declaration of Object to be used as parent of a primitive
 class MeshObject;
 
-struct hitRecord {
+struct HitRecord {
     Float3 point;
     Float3 normal;
     Float rayTime;
@@ -32,7 +32,10 @@ public:
               parent(std::move(
                       parent)) {};
 
-    bool hit(const Ray &ray, Float tMin, Float tMax, hitRecord &hitRecord);
+    Primitive(Float3 a, Float3 b, Float3 c, std::shared_ptr<MeshObject> parent)
+            : a(a), b(b), c(c), normal(Float3::cross(b - a, c - a)), parent(std::move(parent)) {};
+
+    bool hit(Ray &ray, Float tMin, Float tMax, HitRecord &hitRecord) const;
 
     friend std::ostream &operator<<(std::ostream &stream, Primitive &prim);
 

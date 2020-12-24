@@ -4,11 +4,19 @@
 
 #ifndef BACHELORTHESIS_RAY_H
 #define BACHELORTHESIS_RAY_H
+
 #include "Float.h"
+
 struct Ray {
     Float3 base;
     Float3 dir;
     Float time;
+
+    Ray() = default;
+
+    Ray(Float3 base, Float3 dir) : base(base), dir(dir) {}
+
+    Float3 at(Float t) { return base + t * dir; }
 };
 
 #endif //BACHELORTHESIS_RAY_H
