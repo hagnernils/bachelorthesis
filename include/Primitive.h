@@ -8,6 +8,7 @@
 #include <memory>
 #include <utility>
 #include <ostream>
+#include <random>
 #include "Ray.h"
 #include "Float.h"
 
@@ -39,7 +40,8 @@ public:
 
     friend std::ostream &operator<<(std::ostream &stream, Primitive &prim);
 
-    Float3 sampleArea();
+    template<class Generator>
+    Float3 sampleArea(Generator &randomDevice) const;
 
     static Float3 sampleHemisphere();
 

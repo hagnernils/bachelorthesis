@@ -2,6 +2,7 @@
 // Created by Nils Hagner on 20.12.20.
 //
 
+#include <random>
 #include "include/Primitive.h"
 
 Primitive::Primitive() {
@@ -61,8 +62,12 @@ bool Primitive::hit(Ray &ray, Float tMin, Float tMax, HitRecord &hitRecord) cons
     return result && tMin < ray.time && ray.time < tMax;
 }
 
-Float3 Primitive::sampleArea() {
-    return Float3(0, 0, 0);
+template<class Generator>
+Float3 Primitive::sampleArea(Generator &gen) const {
+    auto u = static_cast<Float>(std::generate_canonical<Float, 10>(gen));
+    auto v = static_cast<Float>(std::generate_canonical<Float, 10>(gen));
+
+    return sampleTriangle(this, u, v);
 }
 
 Float3 Primitive::sampleHemisphere() {

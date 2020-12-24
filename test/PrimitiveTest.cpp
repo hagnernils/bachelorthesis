@@ -56,3 +56,26 @@ TEST (Primtive, TriangleHitTMinTMax) {
     EXPECT_EQ(result, true);
     EXPECT_FLOAT_EQ(ray.time, 1);
 }
+
+TEST (Primtive, TriangleSampleArea) {
+// test the sampling
+    Primitive prim;
+    prim.a = Float3(0, 0, 0);
+    prim.b = Float3(1, 0, 0);
+    prim.c = Float3(0, 1, 0);
+
+    std::random_device randomDevice;
+    std::mt19937_64 gen(randomDevice());
+    gen.seed(1234); // NOLINT (cert-msc51-cpp)
+    auto result = prim.sampleArea(gen);
+
+    EXPECT_FLOAT_EQ(result.x, 0.94723159);
+    EXPECT_FLOAT_EQ(result.y, 0.052223373);
+    EXPECT_FLOAT_EQ(result.z, 0);
+
+    auto result2 = prim.sampleArea(gen);
+
+    EXPECT_FLOAT_EQ(result2.x, 0.025681734);
+    EXPECT_FLOAT_EQ(result2.y, 0.054251611);
+    EXPECT_FLOAT_EQ(result2.z, 0);
+}
