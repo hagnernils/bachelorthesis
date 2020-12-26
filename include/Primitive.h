@@ -11,6 +11,7 @@
 #include <random>
 #include "Ray.h"
 #include "Float.h"
+#include "Sampler.h"
 
 // forward declaration of Object to be used as parent of a primitive
 class MeshObject;
@@ -40,8 +41,7 @@ public:
 
     friend std::ostream &operator<<(std::ostream &stream, Primitive &prim);
 
-    template<class Generator>
-    Float3 sampleArea(Generator &randomDevice) const;
+    Float3 sampleArea(const Point2f &p) const;
 
     static Float3 sampleHemisphere();
 

@@ -3,13 +3,16 @@
 //
 
 #include <random>
-#include "include/Primitive.h"
+#include "Sampler.h"
+#include "Primitive.h"
 
 Primitive::Primitive() {
 
 
 }
 
+// Möller, Tomas, and Ben Trumbore. 1997. „Fast, minimum storage ray-triangle intersection“. Journal of Graphics Tools 2 (1): 21–28.
+// https://doi.org/10.1080/10867651.1997.10487468.
 #define EPS 0.00001
 inline bool muellerTrumboreTriangleIntersect(const Float3 rayOrigin, const Float3 rayDir, Float &rayTime,
                                              const Float3 v0, const Float3 v1, const Float3 v2 , Float &u, Float &v) {
@@ -44,14 +47,21 @@ inline bool muellerTrumboreTriangleIntersect(const Float3 rayOrigin, const Float
 }
 
 // see Turk, Greg. 1990. „Generating random points in triangles“. In Graphics gems, 24–28. USA: Academic Press Professional, Inc.
-inline Float3 sampleTriangle(const Primitive *prim, Float s, Float t) {
+// 1st proposed version
+inline Float3 sampleTriangle1(const Float3 &a, const Float3 &b, const Float3 &c, Float s, Float t) {
+    Float squareT = std::sqrt(t);
+    return (1 - squareT) * a + (1 - s) * b + (s * squareT) * c;
+}
+
+// see Turk, Greg. 1990. „Generating random points in triangles“. In Graphics gems, 24–28. USA: Academic Press Professional, Inc.
+// 2nd proposed version
+inline Float3 sampleTriangle2(const Float3 &a, const Float3 &b, const Float3 &c, Float s, Float t) {
     if (s + t > 1) {
         s = 1 - s;
         t = 1 - t;
     }
-
     Float A = 1 - s - t;
-    return A * prim->a + s * prim->b + t * prim->c;
+    return A * a + s * b + t * c;
 }
 
 bool Primitive::hit(Ray &ray, Float tMin, Float tMax, HitRecord &hitRecord) const {
@@ -62,12 +72,8 @@ bool Primitive::hit(Ray &ray, Float tMin, Float tMax, HitRecord &hitRecord) cons
     return result && tMin < ray.time && ray.time < tMax;
 }
 
-template<class Generator>
-Float3 Primitive::sampleArea(Generator &gen) const {
-    auto u = static_cast<Float>(std::generate_canonical<Float, 10>(gen));
-    auto v = static_cast<Float>(std::generate_canonical<Float, 10>(gen));
-
-    return sampleTriangle(this, u, v);
+inline Float3 Primitive::sampleArea(const Point2f &p) const {
+    return sampleTriangle2(a, b, c, p.first, p.second);
 }
 
 Float3 Primitive::sampleHemisphere() {
