@@ -35,6 +35,7 @@ add_executable(bachelorthesis
     include/Scene.h
     include/Buffer.h
     include/Aabb.h
+    include/DirectionSampling.h
     include/Sampler.h
 )
 

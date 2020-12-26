@@ -43,7 +43,7 @@ public:
 
     Float3 sampleArea(const Point2f &p) const;
 
-    static Float3 sampleHemisphere();
+    static Float3 sampleHemisphere(const Point2f &diskSample);
 
     std::shared_ptr<MeshObject> parent;
     Float3 a, b, c;

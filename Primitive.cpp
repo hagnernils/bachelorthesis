@@ -4,6 +4,7 @@
 
 #include <random>
 #include "Sampler.h"
+#include "DirectionSampling.h"
 #include "Primitive.h"
 
 Primitive::Primitive() {
@@ -76,8 +77,8 @@ inline Float3 Primitive::sampleArea(const Point2f &p) const {
     return sampleTriangle2(a, b, c, p.first, p.second);
 }
 
-Float3 Primitive::sampleHemisphere() {
-    return Float3(0, 0, 0);
+inline Float3 Primitive::sampleHemisphere(const Point2f &diskSample) {
+    return uniformSampleHemisphere(diskSample);
 }
 
 std::ostream &operator<<(std::ostream &stream, Primitive &prim) {
