@@ -4,6 +4,7 @@
 
 #ifndef BACHELORTHESIS_MESHOBJECT_H
 #define BACHELORTHESIS_MESHOBJECT_H
+
 #include <string>
 #include <vector>
 #include "Aabb.h"
@@ -23,6 +24,9 @@ public:
     std::vector<BufferView<Float3>> normals;
 
     MeshObject();
+
+    // linearize this mesh into primitives we can sample
+    std::vector<Primitive> toPrimitives();
 };
 
 
