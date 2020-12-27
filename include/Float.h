@@ -32,7 +32,7 @@ struct Vec3 {
     }
 
     inline void normalize() {
-        T length = abs(this);
+        T length = Vec3<T>::length(*this);
         y /= length;
         z /= length;
         x /= length;
