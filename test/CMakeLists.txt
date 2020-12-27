@@ -11,6 +11,7 @@ add_executable(Google_Tests_run
         PrimitiveTest.cpp
         FloatTest.cpp
         DirectionSamplingTest.cpp
+        SceneTest.cpp
 )
 
 target_link_libraries(Google_Tests_run gtest gtest_main)
