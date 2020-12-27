@@ -27,8 +27,8 @@ BufferView<T> AccessorToBufferView(Scene &scene, const int accessorIndex, const 
     BufferView<T> bufferView(bufferBegin
                              + gltfBufferView.byteOffset
                              + accessor.byteOffset);
-    bufferView.byteStride = gltfBufferView.byteStride ? gltfBufferView.byteStride : 1;
     bufferView.numElements = accessor.count;
+    bufferView.byteStride = gltfBufferView.byteStride ? gltfBufferView.byteStride : sizeof(T);
     bufferView.elementSizeInBytes = accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT ? 2 :
                                     accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT ? 4 :
                                     accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT ? 4 :
@@ -95,11 +95,11 @@ void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, M
             meshObject.materialIndex = primitive.material;
             meshObject.transform = fullTransform;
 
-            auto indicesBufferView = AccessorToBufferView<u_char>(scene, primitive.indices, model);
+            auto indicesBufferView = AccessorToBufferView<unsigned char>(scene, primitive.indices, model);
             meshObject.indices.push_back(indicesBufferView);
 
             auto positionAccessor = primitive.attributes.at("POSITION");
-            auto positionBufferView = AccessorToBufferView<Float3>(scene, positionAccessor, model);
+            auto positionBufferView = AccessorToBufferView<unsigned char>(scene, positionAccessor, model);
             meshObject.positions.push_back(positionBufferView);
 
             // construct AABB
@@ -111,7 +111,7 @@ void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, M
 
 
             auto normalsAccessor = primitive.attributes.at("NORMAL");
-            auto normalsBufferView = AccessorToBufferView<Float3>(scene, normalsAccessor, model);
+            auto normalsBufferView = AccessorToBufferView<unsigned char>(scene, normalsAccessor, model);
             meshObject.normals.push_back(normalsBufferView);
 
             assert(meshObject.positions.size() == meshObject.indices.size());

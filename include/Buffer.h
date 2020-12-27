@@ -20,7 +20,7 @@ struct BufferView {
     // Iterator that marks beginning of this buffer
     T *const data = nullptr;
     uint32_t byteLength = 0;
-    uint16_t byteStride = 1;
+    uint16_t byteStride = 0;
     size_t numElements = 0;
     size_t elementSizeInBytes = 0;
 
@@ -31,8 +31,8 @@ struct BufferView {
     const T *begin() { return data; }
 
     bool isValid() { return data == nullptr; }
-
-    const T &operator[](size_t index) const;
 };
+typedef BufferView<unsigned char> ByteBufferView;
+
 
 #endif //BACHELORTHESIS_BUFFER_H

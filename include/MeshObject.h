@@ -19,9 +19,9 @@ public:
     size_t materialIndex = 0;
     Matrix4x4 transform;
     Aabb aabb;
-    std::vector<BufferView<u_char>> indices;
-    std::vector<BufferView<Float3>> positions;
-    std::vector<BufferView<Float3>> normals;
+    std::vector<ByteBufferView> indices;
+    std::vector<ByteBufferView> positions;
+    std::vector<ByteBufferView> normals;
 
     MeshObject();
 
