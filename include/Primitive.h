@@ -27,15 +27,15 @@ class Primitive {
 public:
     Primitive();
 
-    Primitive(Float3 a, Float3 b, Float3 c, Float3 normal,
-              std::shared_ptr<MeshObject> parent)
+    Primitive(Float3 a, Float3 b, Float3 c, Float3 n, std::shared_ptr<MeshObject> parent)
             : a(a), b(b), c(c),
-              normal(normal),
-              parent(std::move(
-                      parent)) {};
+              normal(n),
+              parent(std::move(parent)) { normal.normalize(); };
 
     Primitive(Float3 a, Float3 b, Float3 c, std::shared_ptr<MeshObject> parent)
-            : a(a), b(b), c(c), normal(Float3::cross(b - a, c - a)), parent(std::move(parent)) {};
+            : Primitive(a, b, c,
+                        Float3::cross(b - a, c - a),
+                        std::move(parent)) {};
 
     bool hit(Ray &ray, Float tMin, Float tMax, HitRecord &hitRecord) const;
 
