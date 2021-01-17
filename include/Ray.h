@@ -10,13 +10,13 @@
 struct Ray {
     Float3 base;
     Float3 dir;
-    Float time;
+    Float time = 0;
 
     Ray() = default;
 
     Ray(Float3 base, Float3 dir) : base(base), dir(dir) {}
 
-    Float3 at(Float t) { return base + t * dir; }
+    Float3 at(Float t) const { return base + t * dir; }
 };
 
 #endif //BACHELORTHESIS_RAY_H
