@@ -5,8 +5,7 @@
 #include "Buffer.h"
 
 template<typename T>
-BufferView<T>::BufferView() {
-}
+BufferView<T>::BufferView() = default;
 
 template<typename T>
 BufferView<T>::BufferView(T *bufferBegin) : data(bufferBegin) {}
