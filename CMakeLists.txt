@@ -26,6 +26,7 @@ add_executable(bachelorthesis
     include/DirectionSampling.h
     include/Sampler.h
     include/HitRecord.h
+    include/Spectrum.h
 )
 
 
