@@ -3,7 +3,6 @@
 //
 
 #include "gtest/gtest.h"
-#include "Scene.h"
 #include "../Scene.cpp"
 
 TEST(Scene, LoadGltf) {

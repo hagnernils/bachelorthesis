@@ -44,9 +44,7 @@ void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, M
 
     std::cerr << "node " << node.name << " with index " << nodeIndex << std::endl;
 
-    Matrix4x4 translation = Matrix4x4::identity(),
-            rotation = Matrix4x4::identity(),
-            scale = Matrix4x4::identity();
+    Matrix4x4 translation, rotation, scale;
 
 
     translation = node.translation.empty()
@@ -183,6 +181,26 @@ void Scene::loadGLTF(const std::string &filename) {
         if (isRootNode[i]) {
             processNode(*this, i, model, Matrix<float, 4, 4>::identity());
         }
+    }
+}
+
+bool Scene::closestHit(Ray r, HitRecord *hitRecord) {
+    auto rayMax = 1e16f;
+    bool hit = false;
+    for (unsigned int i = 0; i < sceneGeometry.size(); i++) {
+        if (sceneGeometry[i].hit(r, 0, rayMax, hitRecord)) {
+            hitRecord->PrimitiveIndex = i;
+            rayMax = hitRecord->time;
+            hit = true;
+        }
+    }
+    return hit;
+}
+
+void Scene::buildSceneGeometry() {
+    for (auto &object : objects) {
+        auto prims = object.toPrimitives();
+        sceneGeometry.insert(sceneGeometry.end(), prims.begin(), prims.end());
     }
 }
 
