@@ -52,7 +52,7 @@ TEST (Primtive, TriangleHitTMinTMax) {
 
     HitRecord hr = HitRecord();
 
-    bool result = prim.hit(ray, -1, 2, hr);
+    bool result = prim.hit(ray, -1, 2, &hr);
     EXPECT_EQ(result, true);
     EXPECT_FLOAT_EQ(ray.time, 1);
 }

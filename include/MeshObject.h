@@ -10,7 +10,9 @@
 #include "Aabb.h"
 #include "Buffer.h"
 #include "Matrix.h"
-#include "Primitive.h"
+
+// forward declaration of Primitive class
+class Primitive;
 
 class MeshObject {
 public:

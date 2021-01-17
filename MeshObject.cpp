@@ -7,6 +7,8 @@
 #include <iostream>
 #include "MeshObject.h"
 #include "Buffer.cpp"
+#include "Primitive.h"
+
 
 MeshObject::MeshObject() {
     name = "MeshObject";

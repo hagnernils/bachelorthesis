@@ -12,10 +12,9 @@
 #include "Ray.h"
 #include "Float.h"
 #include "Sampler.h"
+#include "MeshObject.h"
 #include "HitRecord.h"
 
-// forward declaration of Object to be used as parent of a primitive
-class MeshObject;
 
 class Primitive {
 public:
@@ -31,17 +30,19 @@ public:
                         Float3::cross(b - a, c - a),
                         std::move(parent)) {};
 
-    bool hit(Ray &ray, Float tMin, Float tMax, HitRecord &hitRecord) const;
+    [[nodiscard]] bool hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const;
 
     friend std::ostream &operator<<(std::ostream &stream, Primitive &prim);
 
-    Float3 sampleArea(const Point2f &p) const;
+    [[nodiscard]] Float3 sampleArea(const Point2f &p) const;
 
-    static Float3 sampleHemisphere(const Point2f &diskSample);
 
     std::shared_ptr<MeshObject> parent;
     Float3 a, b, c;
     Float3 normal;
+
+    inline Float3 atUV(Float u, Float v) const;
+    inline Float Area() const;
 };
 
 #endif //BACHELORTHESIS_PRIMITIVE_H

@@ -4,13 +4,9 @@
 
 #include <random>
 #include "Sampler.h"
-#include "DirectionSampling.h"
 #include "Primitive.h"
 
-Primitive::Primitive() {
-
-
-}
+Primitive::Primitive() = default;
 
 // Möller, Tomas, and Ben Trumbore. 1997. „Fast, minimum storage ray-triangle intersection“. Journal of Graphics Tools 2 (1): 21–28.
 // https://doi.org/10.1080/10867651.1997.10487468.
@@ -65,20 +61,29 @@ inline Float3 sampleTriangle2(const Float3 &a, const Float3 &b, const Float3 &c,
     return A * a + s * b + t * c;
 }
 
-bool Primitive::hit(Ray &ray, Float tMin, Float tMax, HitRecord &hitRecord) const {
+[[nodiscard]] bool Primitive::hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const {
     Float u, v;
 
-    bool result = muellerTrumboreTriangleIntersect(ray.base, ray.dir, ray.time, a, b, c, u, v);
+    Float time = 0;
+    bool result = muellerTrumboreTriangleIntersect(ray.base, ray.dir, time, a, b, c, u, v);
 
-    return result && tMin < ray.time && ray.time < tMax;
+    bool valid = result && tMin < time && time < tMax;
+
+    if (!valid) return false;
+
+    ray.time = time;
+    hitRecord->u = u;
+    hitRecord->v = v;
+    hitRecord->time = time;
+    if (parent != nullptr)
+        hitRecord->MaterialIndex = parent->materialIndex;
+    hitRecord->normal = normal;
+
+    return true;
 }
 
 inline Float3 Primitive::sampleArea(const Point2f &p) const {
     return sampleTriangle2(a, b, c, p.first, p.second);
-}
-
-inline Float3 Primitive::sampleHemisphere(const Point2f &diskSample) {
-    return uniformSampleHemisphere(diskSample);
 }
 
 std::ostream &operator<<(std::ostream &stream, Primitive &prim) {
@@ -89,4 +94,10 @@ std::ostream &operator<<(std::ostream &stream, Primitive &prim) {
                   << "Normal: " << prim.normal << std::endl
                   << "Parent: " << prim.parent << std::endl
                   << "}" << std::endl;
+}
+
+Float3 Primitive::atUV(Float u, Float v) const { return (1 - u - v) * a + u * b + v * c; }
+
+Float Primitive::Area() const {
+    return ((b - a).length() + (c - a).length() ) * 0.5;
 }
