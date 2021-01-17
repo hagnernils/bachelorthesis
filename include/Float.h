@@ -48,6 +48,10 @@ struct Vec3 {
         return std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
     }
 
+    inline T length() {
+        return std::sqrt(x * x + y * y + z * z);
+    }
+
     friend std::ostream &operator<<(std::ostream &os, const Vec3<T> v) {
         os << std::setprecision(8) << std::fixed << std::showpoint;
         return os << "Float3 {" << v.x << ", " << v.y << ", " << v.z << "}";
@@ -101,14 +105,14 @@ typedef Vec3<float> Float3;
 
 template<typename T>
 inline Vec3<T> operator-(const Vec3<T> &lhs, const Vec3<T> &rhs) {
-    return Vec3(lhs.x - rhs.x,
+    return Vec3<T>(lhs.x - rhs.x,
                 lhs.y - rhs.y,
                 lhs.z - rhs.z);
 }
 
 template<typename T>
 inline Vec3<T> operator+(const Vec3<T> &lhs, const Vec3<T> &rhs) {
-    return Vec3(lhs.x + rhs.x,
+    return Vec3<T>(lhs.x + rhs.x,
                 lhs.y + rhs.y,
                 lhs.z + rhs.z);
 }
@@ -130,7 +134,7 @@ inline T operator*(const Vec3<T> &lhs, const Vec3<T> &rhs) {
 
 template<typename T>
 inline Vec3<T> operator/(const Vec3<T> &v, const T divisor) {
-    return Vec3(v.x / divisor,
+    return Vec3<T>(v.x / divisor,
                 v.y / divisor,
                 v.z / divisor);
 }
