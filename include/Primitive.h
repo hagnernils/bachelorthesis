@@ -12,16 +12,10 @@
 #include "Ray.h"
 #include "Float.h"
 #include "Sampler.h"
+#include "HitRecord.h"
 
 // forward declaration of Object to be used as parent of a primitive
 class MeshObject;
-
-struct HitRecord {
-    Float3 point;
-    Float3 normal;
-    Float rayTime;
-};
-
 
 class Primitive {
 public:

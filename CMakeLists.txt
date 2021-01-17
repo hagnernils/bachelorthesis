@@ -25,6 +25,7 @@ add_executable(bachelorthesis
     include/Aabb.h
     include/DirectionSampling.h
     include/Sampler.h
+    include/HitRecord.h
 )
 
 
