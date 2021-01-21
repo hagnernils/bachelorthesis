@@ -10,7 +10,6 @@
 
 struct AbsorbedEnergySpectrum {
     size_t count;
-    std::valarray<Float> bins;
 
     explicit AbsorbedEnergySpectrum(size_t count) : count(count) {
         bins = std::valarray(0.f, count);
@@ -32,16 +31,34 @@ struct AbsorbedEnergySpectrum {
         bins += other.bins;
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const AbsorbedEnergySpectrum &spectrum);
-};
-
-std::ostream &operator<<(std::ostream &os, const AbsorbedEnergySpectrum &spectrum) {
-    os << "Spectrum { ";
-    os << std::setprecision(8) << std::fixed << std::showpoint;
-    for (auto &v : spectrum.bins) {
-        os << v << " ";
+    void operator/=(Float val) {
+        bins /= val;
     }
-    return os << "}" << std::endl;
-}
 
+    AbsorbedEnergySpectrum &operator*(Float val) {
+        bins *= val;
+        return *this;
+    }
+
+    Float sum() {
+        return bins.sum();
+    }
+
+    AbsorbedEnergySpectrum &normalize() {
+        bins /= bins.sum();
+        return *this;
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, const AbsorbedEnergySpectrum &spectrum) {
+        os << "Spectrum { ";
+        os << std::setprecision(8) << std::fixed << std::showpoint;
+        for (auto &v : spectrum.bins) {
+            os << v << " ";
+        }
+        return os << "}" << std::endl;
+    }
+
+private:
+    std::valarray<Float> bins;
+};
 #endif //BACHELORTHESIS_SPECTRUM_H
