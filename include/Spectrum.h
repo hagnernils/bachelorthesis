@@ -4,6 +4,7 @@
 
 #ifndef BACHELORTHESIS_SPECTRUM_H
 #define BACHELORTHESIS_SPECTRUM_H
+#include <ostream>
 #include <valarray>
 #include "Float.h"
 
@@ -30,6 +31,17 @@ struct AbsorbedEnergySpectrum {
     void operator+=(AbsorbedEnergySpectrum &&other) {
         bins += other.bins;
     }
+
+    friend std::ostream &operator<<(std::ostream &os, const AbsorbedEnergySpectrum &spectrum);
 };
+
+std::ostream &operator<<(std::ostream &os, const AbsorbedEnergySpectrum &spectrum) {
+    os << "Spectrum { ";
+    os << std::setprecision(8) << std::fixed << std::showpoint;
+    for (auto &v : spectrum.bins) {
+        os << v << " ";
+    }
+    return os << "}" << std::endl;
+}
 
 #endif //BACHELORTHESIS_SPECTRUM_H
