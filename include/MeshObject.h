@@ -19,6 +19,7 @@ public:
     std::string name;
     // the material in the scene that object is assigned
     size_t materialIndex = 0;
+    size_t objectID = 0; // TODO: use this in hit function to put into correct bin
     Matrix4x4 transform;
     Aabb aabb;
     std::vector<ByteBufferView> indices;

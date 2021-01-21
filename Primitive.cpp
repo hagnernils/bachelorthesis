@@ -75,8 +75,10 @@ inline Float3 sampleTriangle2(const Float3 &a, const Float3 &b, const Float3 &c,
     hitRecord->u = u;
     hitRecord->v = v;
     hitRecord->time = time;
-    if (parent != nullptr)
+    if (parent != nullptr) {
         hitRecord->MaterialIndex = parent->materialIndex;
+        hitRecord->ObjectIndex = parent->objectID;
+    }
     hitRecord->normal = normal;
 
     return true;

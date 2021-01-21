@@ -189,7 +189,6 @@ bool Scene::closestHit(Ray r, HitRecord *hitRecord) {
     bool hit = false;
     for (unsigned int i = 0; i < sceneGeometry.size(); i++) {
         if (sceneGeometry[i].hit(r, 0, rayMax, hitRecord)) {
-            hitRecord->PrimitiveIndex = i;
             rayMax = hitRecord->time;
             hit = true;
         }
@@ -198,7 +197,9 @@ bool Scene::closestHit(Ray r, HitRecord *hitRecord) {
 }
 
 void Scene::buildSceneGeometry() {
+    unsigned int id = 0;
     for (auto &object : objects) {
+        object.objectID = id++;
         auto prims = object.toPrimitives();
         sceneGeometry.insert(sceneGeometry.end(), prims.begin(), prims.end());
     }
