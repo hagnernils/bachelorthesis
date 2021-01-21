@@ -15,6 +15,7 @@ add_executable(bachelorthesis
     Primitive.cpp
     Material.cpp
     Buffer.cpp
+    Estimator.cpp
     include/Float.h
     include/Material.h
     include/Matrix.h
@@ -26,6 +27,7 @@ add_executable(bachelorthesis
     include/DirectionSampling.h
     include/Sampler.h
     include/HitRecord.h
+    include/Estimator.h
     include/Spectrum.h
 )
 

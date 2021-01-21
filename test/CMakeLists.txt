@@ -12,6 +12,6 @@ add_executable(Google_Tests_run
         FloatTest.cpp
         DirectionSamplingTest.cpp
         SceneTest.cpp
-)
+        EstimatorTest.cpp)
 
 target_link_libraries(Google_Tests_run gtest gtest_main)
