@@ -82,7 +82,7 @@ inline Float3 sampleTriangle2(const Float3 &a, const Float3 &b, const Float3 &c,
     return true;
 }
 
-inline Float3 Primitive::sampleArea(const Point2f &p) const {
+Float3 Primitive::sampleArea(const Point2f &p) const {
     return sampleTriangle2(a, b, c, p.first, p.second);
 }
 
@@ -96,8 +96,4 @@ std::ostream &operator<<(std::ostream &stream, Primitive &prim) {
                   << "}" << std::endl;
 }
 
-Float3 Primitive::atUV(Float u, Float v) const { return (1 - u - v) * a + u * b + v * c; }
-
-Float Primitive::Area() const {
-    return ((b - a).length() + (c - a).length() ) * 0.5;
-}
+inline Float3 Primitive::atUV(Float u, Float v) const { return (1 - u - v) * a + u * b + v * c; }

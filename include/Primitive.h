@@ -34,15 +34,17 @@ public:
 
     friend std::ostream &operator<<(std::ostream &stream, Primitive &prim);
 
-    [[nodiscard]] Float3 sampleArea(const Point2f &p) const;
+    Float3 sampleArea(const Point2f &p) const;
 
+    inline Float3 atUV(Float u, Float v) const;
+
+    Float Area() const {
+        return ((b - a).length() + (c - a).length()) * 0.5;
+    }
 
     std::shared_ptr<MeshObject> parent;
     Float3 a, b, c;
     Float3 normal;
-
-    inline Float3 atUV(Float u, Float v) const;
-    inline Float Area() const;
 };
 
 #endif //BACHELORTHESIS_PRIMITIVE_H
