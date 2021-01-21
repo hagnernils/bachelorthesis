@@ -19,6 +19,8 @@ struct Vec3 {
 
     Vec3(T x, T y, T z) : x(x), y(y), z(z) {}
 
+    Vec3(const Vec3& v) : x(v.x), y(v.y), z(v.z) {}
+
     Vec3(std::initializer_list<T> &list) {
         if (list.size() == 3) {
             x = list[0];
@@ -57,10 +59,11 @@ struct Vec3 {
         return os << "Float3 {" << v.x << ", " << v.y << ", " << v.z << "}";
     }
 
-    inline void operator-() {
+    inline Vec3<T> &operator-() {
+        x = -x;
         y = -y;
         z = -z;
-        x = -x;
+        return *this;
     }
 
     inline void operator-=(const Vec3<T> &v) {
