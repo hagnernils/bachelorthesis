@@ -13,8 +13,8 @@ std::vector<AbsorbedEnergySpectrum> Estimator::estimateAbsorption() {
         auto nodeSpectrum = AbsorbedEnergySpectrum(nodeCount);
 
         Float nodeSurfaceArea = 0;
-        std::for_each(prims.begin(), prims.end(),
-                      [&nodeSurfaceArea](Primitive &p) { nodeSurfaceArea += p.Area(); });
+        for (Primitive &p : prims)
+            nodeSurfaceArea += p.Area();
 
         for (auto &prim : prims) {
             auto primitiveSpectrum = AbsorbedEnergySpectrum(nodeCount);
