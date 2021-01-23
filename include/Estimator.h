@@ -26,8 +26,7 @@ public:
 
 private:
     // send one global sample and calculate its absorption
-    AbsorbedEnergySpectrum estimateAbsorption(Primitive &emittingPrimitive);
-
+    std::pair<size_t, Float> estimateAbsorption(Primitive &emittingPrimitive);
 };
 
 #endif //BACHELORTHESIS_ESTIMATOR_H
