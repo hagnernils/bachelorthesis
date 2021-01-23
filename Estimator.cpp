@@ -8,6 +8,7 @@ std::vector<AbsorbedEnergySpectrum> Estimator::estimateAbsorption() {
     const auto nodeCount = scene->nodeCount();
     std::vector<AbsorbedEnergySpectrum> result(nodeCount, AbsorbedEnergySpectrum(nodeCount));
 
+    #pragma omp parallel for default(none) shared(result, nodeCount)
     for (unsigned int i = 0; i < nodeCount; i++) {
         auto prims = scene->objects[i].toPrimitives();
         auto nodeSpectrum = AbsorbedEnergySpectrum(nodeCount);
@@ -21,6 +22,7 @@ std::vector<AbsorbedEnergySpectrum> Estimator::estimateAbsorption() {
 
             for (unsigned int j = 0; j < samplesPerPrimitive; j++) {
                 auto estimate = estimateAbsorption(prim);
+                #pragma omp atomic
                 primitiveSpectrum[estimate.first] += estimate.second;
             }
             // we assume even emittance over mesh, so scale emitted energy of primitive with its percentage of the whole

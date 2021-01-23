@@ -34,5 +34,11 @@ add_executable(bachelorthesis
     include/Spectrum.h
 )
 
+# link libraries
 
 target_link_libraries(bachelorthesis libtinygltf)
+
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(bachelorthesis OpenMP::OpenMP_CXX)
+endif()
