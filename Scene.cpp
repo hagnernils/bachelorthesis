@@ -187,8 +187,8 @@ void Scene::loadGLTF(const std::string &filename) {
 bool Scene::closestHit(Ray r, HitRecord *hitRecord) {
     auto rayMax = 1e16f;
     bool hit = false;
-    for (unsigned int i = 0; i < sceneGeometry.size(); i++) {
-        if (sceneGeometry[i].hit(r, 0, rayMax, hitRecord)) {
+    for (auto & i : sceneGeometry) {
+        if (i.hit(r, 0, rayMax, hitRecord)) {
             rayMax = hitRecord->time;
             hit = true;
         }
