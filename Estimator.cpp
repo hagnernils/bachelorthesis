@@ -5,20 +5,20 @@
 #include "Estimator.h"
 
 std::vector<AbsorbedEnergySpectrum> Estimator::estimateAbsorption() {
-    const auto nodeCount = scene->nodeCount();
-    std::vector<AbsorbedEnergySpectrum> result(nodeCount, AbsorbedEnergySpectrum(nodeCount));
+    const auto nodeCount = scene->emittingNodeCount();
+    std::vector<AbsorbedEnergySpectrum> result(nodeCount, AbsorbedEnergySpectrum(nodeCount + 1));
 
     #pragma omp parallel for default(none) shared(result, nodeCount)
     for (unsigned int i = 0; i < nodeCount; i++) {
         auto prims = scene->objects[i].toPrimitives();
-        auto nodeSpectrum = AbsorbedEnergySpectrum(nodeCount);
+        auto nodeSpectrum = AbsorbedEnergySpectrum(nodeCount + 1);
 
         Float nodeSurfaceArea = 0;
         for (Primitive &p : prims)
             nodeSurfaceArea += p.Area();
 
         for (auto &prim : prims) {
-            auto primitiveSpectrum = AbsorbedEnergySpectrum(nodeCount);
+            auto primitiveSpectrum = AbsorbedEnergySpectrum(nodeCount + 1);
 
             for (unsigned int j = 0; j < samplesPerPrimitive; j++) {
                 auto estimate = estimateAbsorption(prim);
@@ -60,5 +60,6 @@ std::pair<size_t, Float> Estimator::estimateAbsorption(Primitive &emittingPrimit
         hitRecord.MaterialIndex = emittingPrimitive.parent->materialIndex;
         return std::make_pair(hitRecord.ObjectIndex, rayEnergy);
     }
-    return std::make_pair(0, 0);
+    // if we did not hit anything, add the energy to the enclosure
+    return std::make_pair(scene->emittingNodeCount(), rayEnergy);
 }

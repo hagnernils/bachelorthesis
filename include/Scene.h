@@ -21,7 +21,10 @@ public:
     std::vector<Material> materials;
     std::vector<Buffer<u_char>> buffers;
 
-    size_t nodeCount() const { return objects.size(); }
+    // Node count, exclusive the Miss / Environment / Enclosure
+    size_t emittingNodeCount() const { return objects.size(); }
+
+    size_t absorbingNodeCount() const { return objects.size() + 1; }
 
     void loadGLTF(const std::string &filename);
 
