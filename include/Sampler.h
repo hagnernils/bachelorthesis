@@ -32,8 +32,21 @@ public:
         return std::make_pair(u, v);
     }
 
+    inline Float3 rejectionSampleUnitSphere() {
+        while (true) {
+            auto dir = randomVector3();
+            if (dir.length() < 1)
+                return dir;
+        }
+    }
+
     inline Point2f sampleDisk() {
         return rejectionSampleDisk();
+    }
+
+    inline int uniformInt(int lower, int upper) {
+        std::uniform_int_distribution<> distribution(lower, upper);
+        return distribution(generator);
     }
 
     void seed(size_t seed) {
@@ -50,6 +63,10 @@ private:
         if (u * u + v * v < 1)
             return std::make_pair(u, v);
         return rejectionSampleDisk();
+    }
+
+    inline Float3 randomVector3() {
+        return Float3(2 * getCanonical() - 1, 2 * getCanonical() - 1, 2 * getCanonical() - 1);
     }
 };
 
