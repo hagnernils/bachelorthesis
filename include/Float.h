@@ -33,11 +33,12 @@ struct Vec3 {
         return x * v.x + y * v.y + z * v.z;
     }
 
-    inline void normalize() {
-        T length = Vec3<T>::length(*this);
+    inline Vec3<T> normalize() {
+        T length = this->length();
         y /= length;
         z /= length;
         x /= length;
+        return *this;
     }
 
     inline static Vec3<T> cross(const Vec3<T> &a, const Vec3<T> &b) {
@@ -57,6 +58,10 @@ struct Vec3 {
     friend std::ostream &operator<<(std::ostream &os, const Vec3<T> v) {
         os << std::setprecision(8) << std::fixed << std::showpoint;
         return os << "Float3 {" << v.x << ", " << v.y << ", " << v.z << "}";
+    }
+
+    std::array<T, 3> operator()() const {
+        return {x, y, z};
     }
 
     inline Vec3<T> &operator-() {
@@ -140,6 +145,15 @@ inline Vec3<T> operator/(const Vec3<T> &v, const T divisor) {
     return Vec3<T>(v.x / divisor,
                 v.y / divisor,
                 v.z / divisor);
+}
+
+template<typename T>
+inline Vec3<T> normalize(Vec3<T> &vec) {
+    T length = vec.length();
+    vec.y /= length;
+    vec.z /= length;
+    vec.x /= length;
+    return vec;
 }
 
 #endif //BACHELORTHESIS_FLOAT_H
