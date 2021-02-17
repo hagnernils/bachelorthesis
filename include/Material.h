@@ -5,12 +5,20 @@
 #ifndef BACHELORTHESIS_MATERIAL_H
 #define BACHELORTHESIS_MATERIAL_H
 #include <string>
+#include "HitRecord.h"
 
 struct Material {
     std::string name;
     float absorption = 1.f; // equals emission according to Kirchhoffs law
     float specularReflection = 0.f;
     float diffuseReflection = 0.f;
+
+    explicit Material(std::string name, float absorption = 1, float specularReflection = 0, float diffuseReflection = 0);
+
+    RaySurfaceInteraction interact(float rand);
+
+private:
+    float cdf[3] = {1, 0, 0};
 };
 
 
