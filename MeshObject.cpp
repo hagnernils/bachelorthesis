@@ -17,9 +17,9 @@ MeshObject::MeshObject() {
                 Float3{0, 0, 0}};
 }
 
-std::vector<Primitive> MeshObject::toPrimitives() {
+std::vector<std::shared_ptr<Primitive>> MeshObject::toPrimitives() {
 
-    auto prims = std::vector<Primitive>();
+    auto prims = std::vector<std::shared_ptr<Primitive>>();
 
     for (unsigned int subMeshIndex = 0; subMeshIndex < indices.size(); subMeshIndex++) {
         // we only want valid meshes with triangles
@@ -39,10 +39,11 @@ std::vector<Primitive> MeshObject::toPrimitives() {
         const size_t numIndexTriplets = indexBuffer.numElements / 3;
 
         for (unsigned int i = 0; i < numIndexTriplets; i++) {
-            prims.emplace_back(vertexPositionsVector[3 * i + 0],
+            auto p = std::make_shared<Primitive>(vertexPositionsVector[3 * i + 0],
                                vertexPositionsVector[3 * i + 1],
                                vertexPositionsVector[3 * i + 2],
                                std::make_shared<MeshObject>(*this));
+            prims.push_back(p);
         }
     }
 
