@@ -12,13 +12,16 @@
 #include "Scene.h"
 #include "Primitive.h"
 
+typedef size_t AbsorptionIndex;
 
 class Estimator {
 public:
     Estimator() = default;
 
-    DefaultSampler sampler;
-    Scene *scene = nullptr;
+    Estimator(const std::shared_ptr<Scene>& scene) : scene(scene), sampler(scene->sampler) {};
+
+    std::shared_ptr<DefaultSampler> sampler;
+    std::shared_ptr<Scene> scene = nullptr;
 
     const unsigned int samplesPerPrimitive = 10000;
 
@@ -27,6 +30,12 @@ public:
 private:
     // send one global sample and calculate its absorption
     std::pair<size_t, Float> estimateAbsorption(Primitive &emittingPrimitive);
+
+    std::pair<AbsorptionIndex, Float> reflectDiffuse(HitRecord &hitRecord, Ray &ray);
+
+    std::pair<AbsorptionIndex, Float> reflectSpecular(HitRecord &hitRecord, Ray &ray);
+
+    std::pair<AbsorptionIndex, Float> estimateAbsorptionAtRay(HitRecord &hitRecord, Ray &ray);
 };
 
 #endif //BACHELORTHESIS_ESTIMATOR_H

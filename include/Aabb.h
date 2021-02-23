@@ -19,7 +19,7 @@ struct Aabb {
          const Float maxX, const Float maxY, const Float maxZ) : min({minX, minY, minZ}), max({maxX, maxY, maxZ}) {}
 
     bool hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const {
-        // TODO: factor this out
+        // TODO: factor out
         Float inverseDirection[3] = {static_cast<Float>(1. / ray.dir.x), static_cast<Float>(1. / ray.dir.y), static_cast<Float>(1. / ray.dir.z)};
 
         for (auto i = 0; i < 3; i++) {

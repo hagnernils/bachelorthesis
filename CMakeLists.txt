@@ -19,6 +19,7 @@ add_executable(bachelorthesis
     Material.cpp
     Buffer.cpp
     Estimator.cpp
+    BVH.cpp
     include/Float.h
     include/Material.h
     include/Matrix.h
@@ -32,6 +33,7 @@ add_executable(bachelorthesis
     include/HitRecord.h
     include/Estimator.h
     include/Spectrum.h
+    include/BVH.h
 )
 
 # link libraries

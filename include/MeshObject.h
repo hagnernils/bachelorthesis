@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include "Aabb.h"
 #include "Buffer.h"
 #include "Matrix.h"
@@ -29,7 +30,7 @@ public:
     MeshObject();
 
     // linearize this mesh into primitives we can sample
-    std::vector<Primitive> toPrimitives();
+    std::vector<std::shared_ptr<Primitive>> toPrimitives();
 };
 
 

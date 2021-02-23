@@ -147,8 +147,7 @@ void Scene::loadGLTF(const std::string &filename) {
     // Add materials
     for (const auto &material : model.materials) {
         std::cerr << "Found Material : " << material.name << std::endl;
-        Material mat;
-        mat.name = material.name;
+        Material mat = Material(material.name);
 
         // the four-component base color factor is used for the material values
         const auto base_color_it = material.values.find("baseColorFactor");
@@ -185,23 +184,86 @@ void Scene::loadGLTF(const std::string &filename) {
 }
 
 bool Scene::closestHit(Ray r, HitRecord *hitRecord) {
-    auto rayMax = 1e16f;
+    Float tMin = 0;
+    Float tMax = 1e16f;
     bool hit = false;
-    for (auto & i : sceneGeometry) {
-        if (i.hit(r, 0, rayMax, hitRecord)) {
-            rayMax = hitRecord->time;
+    //hit = bvh.hit(r, tMin, tMax, hitRecord);
+
+    for (auto &p: sceneGeometry)
+        if (p->hit(r, tMin, tMax, hitRecord)) {
+            tMax = hitRecord->time;
             hit = true;
         }
+    /*
+    auto currentNodeIndex = 0;
+    while (true) {
+        auto currentNode = hitBVH[currentNodeIndex];
+        if (currentNode.bounds.hit(r, 0, rayMax, hitRecord)) {
+            if (!currentNode.primitives.empty()) {
+                for (auto &p : currentNode.primitives) {
+                    if (p.hit(r, 0, rayMax, hitRecord))
+                        hit = true;
+                }
+                if ()
+            }
+        }
     }
+     */
     return hit;
 }
 
 void Scene::buildSceneGeometry() {
     unsigned int id = 0;
+    unsigned int pid = 0;
     for (auto &object : objects) {
         object.objectID = id++;
         auto prims = object.toPrimitives();
+        for (auto& prim : prims) {
+            prim->Id = pid++;
+        }
+        primsOfObject.push_back(prims);
         sceneGeometry.insert(sceneGeometry.end(), prims.begin(), prims.end());
     }
+
+
+    // BVHNode::sampler = sampler;
+    bvh = BVHNode(sceneGeometry, 0, sceneGeometry.size());
+    size_t offset = 0;
+    hitBVH = std::vector<LinearBVHNode>(2 << (bvh.depth() + 1));
+    bvh.linearize(hitBVH, offset);
 }
 
+void Scene::MeshToGnuPlotMesh(const std::string& filename) {
+    std::fstream outfile("mesh.out", std::ios::out);
+    auto len = sceneGeometry.size();
+    std::vector<Float> x, y, z;
+    std::vector<size_t> tris;
+    for (const auto& p: sceneGeometry) {
+        x.push_back(p->a.x);
+        y.push_back(p->a.y);
+        z.push_back(p->a.z);
+
+        x.push_back(p->b.x);
+        y.push_back(p->b.y);
+        z.push_back(p->b.z);
+
+        x.push_back(p->c.x);
+        y.push_back(p->c.y);
+        z.push_back(p->c.z);
+
+        size_t vI = tris.size();
+        tris.insert(tris.end(), {vI, vI + 1, vI + 2});
+    }
+    auto sep = ", ";
+
+    for (auto &vec : {x, y, z}) {
+        for (auto val : vec) {
+            outfile << val << sep;
+        }
+        outfile << std::endl;
+    }
+
+    for (auto i = 0; i < len; i++)
+        outfile << tris[3 * i] << sep << tris[3 * i + 1] << sep << tris[3 * i + 2] << std::endl;
+
+}

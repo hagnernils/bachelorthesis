@@ -79,6 +79,7 @@ inline Float3 sampleTriangle2(const Float3 &a, const Float3 &b, const Float3 &c,
         hitRecord->MaterialIndex = parent->materialIndex;
         hitRecord->ObjectIndex = parent->objectID;
     }
+    hitRecord->primitiveIndex = Id;
     hitRecord->normal = normal;
 
     return true;

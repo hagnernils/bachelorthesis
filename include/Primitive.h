@@ -65,6 +65,7 @@ public:
     std::shared_ptr<MeshObject> parent;
     Float3 a, b, c;
     Float3 normal;
+    size_t Id;
 };
 
 #endif //BACHELORTHESIS_PRIMITIVE_H

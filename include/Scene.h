@@ -5,9 +5,11 @@
 #ifndef BACHELORTHESIS_SCENE_H
 #define BACHELORTHESIS_SCENE_H
 
+#include <utility>
 #include <vector>
 #include <string>
 #include "Buffer.h"
+#include "BVH.h"
 #include "Material.h"
 #include "Matrix.h"
 #include "MeshObject.h"
@@ -18,8 +20,16 @@
 class Scene {
 public:
     std::vector<MeshObject> objects;
-    std::vector<Material> materials;
+    std::vector<Material> materials = { Material{"default", 1,0,0}};
     std::vector<Buffer<u_char>> buffers;
+    std::shared_ptr<DefaultSampler> sampler = std::make_shared<DefaultSampler>();
+    std::vector<std::vector<std::shared_ptr<Primitive>>> primsOfObject;
+
+
+    Scene() {
+        sampler->seed(12345);
+        bvh.setSampler(sampler);
+    }
 
     // Node count, exclusive the Miss / Environment / Enclosure
     size_t emittingNodeCount() const { return objects.size(); }
@@ -28,6 +38,8 @@ public:
 
     void loadGLTF(const std::string &filename);
 
+    void MeshToGnuPlotMesh(const std::string& filename="mesh.out.txt");
+
     // prepare the scene so rays can be traced.
     void buildSceneGeometry();
 
@@ -35,7 +47,9 @@ public:
     bool closestHit(Ray r, HitRecord *hitRecord);
 
 private:
-    std::vector<Primitive> sceneGeometry;
+    std::vector<std::shared_ptr<Primitive>> sceneGeometry;
+    std::vector<LinearBVHNode> hitBVH;
+    BVHNode bvh;
 };
 
 
