@@ -19,7 +19,7 @@ inline bool muellerTrumboreTriangleIntersect(const Float3 rayOrigin, const Float
     edge1 = v1 - v0;
     edge2 = v2 - v0;
 
-    p = Float3 ::cross(rayDir, edge2);
+    p = Float3::cross(rayDir, edge2);
 
     det = edge1.dot(p);
 
@@ -29,7 +29,7 @@ inline bool muellerTrumboreTriangleIntersect(const Float3 rayOrigin, const Float
 
     t = rayOrigin - v0;
 
-    u = t.dot(p);
+    u = t.dot(p) * invDet;
     if (u < 0.0 || u > 1.0)
         return false;
 
@@ -67,7 +67,7 @@ inline Float3 sampleTriangle2(const Float3 &a, const Float3 &b, const Float3 &c,
     Float time = 0;
     bool result = muellerTrumboreTriangleIntersect(ray.base, ray.dir, time, a, b, c, u, v);
 
-    bool valid = result && tMin < time && time < tMax;
+    bool valid = result && (tMin < time) && (time < tMax);
 
     if (!valid) return false;
 
