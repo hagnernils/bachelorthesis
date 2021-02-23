@@ -99,3 +99,15 @@ std::ostream &operator<<(std::ostream &stream, Primitive &prim) {
 }
 
 inline Float3 Primitive::atUV(Float u, Float v) const { return (1 - u - v) * a + u * b + v * c; }
+
+bool Primitive::operator==(const Primitive &rhs) const {
+    return parent == rhs.parent &&
+           a == rhs.a &&
+           b == rhs.b &&
+           c == rhs.c &&
+           normal == rhs.normal;
+}
+
+bool Primitive::operator!=(const Primitive &rhs) const {
+    return !(rhs == *this);
+}

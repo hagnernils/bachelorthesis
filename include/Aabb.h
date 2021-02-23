@@ -19,6 +19,7 @@ struct Aabb {
          const Float maxX, const Float maxY, const Float maxZ) : min({minX, minY, minZ}), max({maxX, maxY, maxZ}) {}
 
     bool hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const {
+        // TODO: factor this out
         Float inverseDirection[3] = {static_cast<Float>(1. / ray.dir.x), static_cast<Float>(1. / ray.dir.y), static_cast<Float>(1. / ray.dir.z)};
 
         for (auto i = 0; i < 3; i++) {
@@ -30,7 +31,6 @@ struct Aabb {
             tMax = t1 < tMax ? t1 : tMax;
             if (tMax <= tMin) return false;
         }
-        hitRecord->time = tMin;
         return true;
     }
 
@@ -68,6 +68,10 @@ struct Aabb {
     }
 
     Float3 center() { return min + max * 0.5; }
+
+    bool operator==(const Aabb& other) const {
+        return min == other.min && max == other.max;
+    }
 };
 
 #endif //BACHELORTHESIS_AABB_H

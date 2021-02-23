@@ -60,6 +60,13 @@ struct Vec3 {
         return os << "Float3 {" << v.x << ", " << v.y << ", " << v.z << "}";
     }
 
+    std::string toString() {
+        std::stringstream ss;
+        ss << std::setprecision(8) << std::fixed << std::showpoint;
+        ss << x << " " << y << " " << z;
+        return ss.str();
+    }
+
     std::array<T, 3> operator()() const {
         return {x, y, z};
     }
