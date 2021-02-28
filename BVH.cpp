@@ -18,7 +18,7 @@ void BVHNode::linearize(std::vector<LinearBVHNode> &result, size_t index) {
     right->linearize(result, 2 * index + 2);
 }
 
-BVHNode::BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t begin, size_t end) {
+BVHNode::BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t begin, size_t end, int maxPrimsPerLeaf) {
     auto treeSize = end - begin;
 
     for (auto i = begin; i < end; i++)
@@ -57,8 +57,8 @@ BVHNode::BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t beg
             secondSetBegin = begin + treeSize / 2;
         }
 
-        left = std::make_shared<BVHNode>(primitives, begin, secondSetBegin);
-        right = std::make_shared<BVHNode>(primitives, secondSetBegin, end);
+        left = std::make_shared<BVHNode>(primitives, begin, secondSetBegin, maxPrimsPerLeaf);
+        right = std::make_shared<BVHNode>(primitives, secondSetBegin, end, maxPrimsPerLeaf);
     }
 }
 
@@ -91,7 +91,7 @@ void BVHNode::makeLeaf(const std::vector<std::shared_ptr<Primitive>> &prims, siz
 
 std::ostream &operator<<(std::ostream &os, const BVHNode &b) {
     if (!b.primitives.empty()) {
-        os << "Leaf with " << b.primitives.size() << "primitives: {";
+        os << "Leaf with " << b.primitives.size() << " primitives: {";
         //for (auto p: b.primitives)
         //    os << p << " ";
         return os << "}";

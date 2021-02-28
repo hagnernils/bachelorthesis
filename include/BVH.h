@@ -40,7 +40,7 @@ public:
 
     bool hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const;
 
-    BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t begin, size_t end);
+    BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t begin, size_t end, int maxPrimsPerLeaf=50);
 
     void linearize(std::vector<LinearBVHNode> &result, size_t index);
 
@@ -48,8 +48,7 @@ public:
 
     friend std::ostream &operator<<(std::ostream &os, const BVHNode &b);
 
-    Aabb bounds{};
-    static const size_t maxPrimsPerLeaf = 1;
+    Aabb bounds;
     size_t depth();
     size_t numNodes();
 private:

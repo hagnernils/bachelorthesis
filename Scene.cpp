@@ -226,8 +226,7 @@ void Scene::buildSceneGeometry() {
     }
 
 
-    // BVHNode::sampler = sampler;
-    bvh = BVHNode(sceneGeometry, 0, sceneGeometry.size());
+    bvh = BVHNode(sceneGeometry, 0, sceneGeometry.size(), 5000);
     size_t offset = 0;
     hitBVH = std::vector<LinearBVHNode>(2 << (bvh.depth() + 1));
     bvh.linearize(hitBVH, offset);
