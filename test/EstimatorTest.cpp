@@ -7,12 +7,11 @@
 #include "../Estimator.cpp"
 
 TEST(Estimate, EstimatorRectangleToRectangle) {
-    Scene scene;
-    scene.loadGLTF("twoSquares.gltf");
-    scene.buildSceneGeometry();
-    Estimator estimator;
-    estimator.scene = &scene;
-    estimator.sampler.seed(1234);
+    auto scene = std::make_shared<Scene>();
+    scene->loadGLTF("twoSquares.gltf");
+    scene->buildSceneGeometry();
+    Estimator estimator(scene);
+    estimator.sampler->seed(1234);
 
     auto result = estimator.estimateAbsorption();
 

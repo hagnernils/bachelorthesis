@@ -11,6 +11,10 @@ include_directories(include)
 add_subdirectory(test)
 add_subdirectory(tinygltf)
 
+include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+
+
+
 add_executable(bachelorthesis
     main.cpp
     Scene.cpp

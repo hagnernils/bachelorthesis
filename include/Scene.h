@@ -16,6 +16,7 @@
 #include "Ray.h"
 #include "HitRecord.h"
 #include "Primitive.h"
+#include "gtest/gtest.h"
 
 class Scene {
 public:
@@ -47,6 +48,7 @@ public:
     bool closestHit(Ray r, HitRecord *hitRecord);
 
 private:
+    FRIEND_TEST(Scene, BuildBVH);
     std::vector<std::shared_ptr<Primitive>> sceneGeometry;
     std::vector<LinearBVHNode> hitBVH;
     BVHNode bvh;
