@@ -12,7 +12,7 @@ struct Aabb {
     Float3 min;
     Float3 max;
 
-    Aabb() = default;
+    Aabb() : min({0,0,0}), max({0,0,0}) {};
 
     Aabb(const Float3 &min, const Float3 &max) : min(min), max(max) {}
     Aabb(const Float minX, const Float minY, const Float minZ,
@@ -21,10 +21,11 @@ struct Aabb {
     bool hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const {
         // TODO: factor out
         Float inverseDirection[3] = {static_cast<Float>(1. / ray.dir.x), static_cast<Float>(1. / ray.dir.y), static_cast<Float>(1. / ray.dir.z)};
-
+        auto baseToMin = min - ray.base;
+        auto baseToMax = max - ray.base;
         for (auto i = 0; i < 3; i++) {
-            auto t0 = inverseDirection[i] * (min()[i] - ray.base()[i]);
-            auto t1 = inverseDirection[i] * (max()[i] - ray.base()[i]);
+            auto t0 = inverseDirection[i] * (baseToMin()[i]);
+            auto t1 = inverseDirection[i] * (baseToMax()[i]);
             if (inverseDirection[i] < 0.0)
                 std::swap(t0, t1);
             tMin = t0 > tMin ? t0 : tMin;
@@ -45,7 +46,7 @@ struct Aabb {
 
     void operator+=(const Aabb &other) {
         min.x = std::min(min.x, other.min.x);
-        min.z = std::min(min.y, other.min.y);
+        min.y = std::min(min.y, other.min.y);
         min.z = std::min(min.z, other.min.z);
         max.x = std::max(max.x, other.max.x);
         max.y = std::max(max.y, other.max.y);
@@ -54,7 +55,7 @@ struct Aabb {
 
     void operator+=(const Float3 &other) {
         min.x = std::min(min.x, other.x);
-        min.z = std::min(min.y, other.y);
+        min.y = std::min(min.y, other.y);
         min.z = std::min(min.z, other.z);
         max.x = std::max(max.x, other.x);
         max.y = std::max(max.y, other.y);
