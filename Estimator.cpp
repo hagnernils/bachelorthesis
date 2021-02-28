@@ -48,12 +48,10 @@ std::pair<AbsorptionIndex, Float> Estimator::estimateAbsorption(Primitive &emitt
     constexpr Float offsetScale = std::numeric_limits<Float>::epsilon();
     primitiveSample += emittingPrimitive.normal * offsetScale;
 
-    auto directionSample = uniformSampleHemisphere(sampler->sampleDisk());
-    // flip the direction to be in line with the normal
-    if (directionSample.dot(emittingPrimitive.normal) < 0.f)
-        directionSample = -directionSample;
+    auto directionSample = uniformSampleHemisphereAtNormal(emittingPrimitive.normal, sampler->sampleDisk());
 
-    // TODO: determine wether this is intensity or not, bc this is direction emissive power
+
+    // TODO: determine whether this is intensity or not, bc this is direction emissive power
     Float rayEnergy = cos(directionSample.dot(emittingPrimitive.normal));
 
     Ray ray(primitiveSample, directionSample, rayEnergy);
