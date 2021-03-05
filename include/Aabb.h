@@ -68,7 +68,7 @@ struct Aabb {
         return std::distance(distances.begin(), std::max_element(distances.begin(), distances.end()));
     }
 
-    Float3 center() { return min + max * 0.5; }
+    Float3 center() { return (min + max) * 0.5; }
 
     bool operator==(const Aabb& other) const {
         return min == other.min && max == other.max;

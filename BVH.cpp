@@ -18,9 +18,10 @@ void BVHNode::linearize(std::vector<LinearBVHNode> &result, size_t index) {
     right->linearize(result, 2 * index + 2);
 }
 
-BVHNode::BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t begin, size_t end, int maxPrimsPerLeaf) {
+BVHNode::BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t begin, size_t end, unsigned int maxPrimsPerLeaf) {
     auto treeSize = end - begin;
 
+    bounds = primitives[begin]->bounds;
     for (auto i = begin; i < end; i++)
         bounds += (primitives[i]->bounds);
 
@@ -28,35 +29,35 @@ BVHNode::BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t beg
         makeLeaf(primitives, begin, end);
         return;
     } else {
-        std::vector<Float3> centers;
-        Aabb centroidBounds{};
+        Aabb centroidBounds = {primitives[begin]->bounds.center(), primitives[begin]->bounds.center()};
         size_t splitAxis;
         Float splitValue;
         size_t secondSetBegin;
 
         for (auto i = begin; i < end; i++) {
-            auto c = primitives[i]->bounds.center();
-            centers.push_back(c);
-            centroidBounds += c;
+            centroidBounds += primitives[i]->bounds.center();
         }
         if (axisMethod == LONGESTAXIS) {
             splitAxis = centroidBounds.longestAxis();
         } else if (axisMethod == RANDOMAXIS) {
             splitAxis = sampler->uniformInt(0, 2);
         }
-
-        if (splitMethod == MIDPOINT) {
-            splitValue = ((centroidBounds.min + centroidBounds.max) / 2.f)()[splitAxis];
-            auto partitioner = [splitAxis, splitValue](std::shared_ptr<Primitive> &p){ return p->bounds.center()()[splitAxis] < splitValue; };
-            auto partition = std::partition(primitives.begin() + begin, primitives.begin() + end, partitioner);
-            secondSetBegin = partition - primitives.begin();
-        } else if (splitMethod == MEDIANCUT) {
-            auto comparator = [splitAxis](std::shared_ptr<Primitive> &p1,
-                                          std::shared_ptr<Primitive> &p2){ return p1->bounds.center()()[splitAxis] < p1->bounds.center()()[splitAxis]; };
-            std::sort(primitives.begin(), primitives.end(), comparator);
-            secondSetBegin = begin + treeSize / 2;
+        switch (splitMethod) {
+            case MIDPOINT: {
+                splitValue = ((centroidBounds.min + centroidBounds.max) / 2.f)()[splitAxis];
+                auto partitioner = [splitAxis, splitValue](std::shared_ptr<Primitive> &p){ return p->bounds.center()()[splitAxis] < splitValue; };
+                auto partition = std::partition(primitives.begin() + begin, primitives.begin() + end, partitioner);
+                secondSetBegin = partition - primitives.begin();
+                if (secondSetBegin != treeSize)  // fallback to median cut if all primitives lie on the same value of the chosen axis
+                    break;
+            }
+            case MEDIANCUT: {
+                auto comparator = [splitAxis](std::shared_ptr<Primitive> &p1,
+                                              std::shared_ptr<Primitive> &p2){ return p1->bounds.center()()[splitAxis] < p2->bounds.center()()[splitAxis]; };
+                std::sort(primitives.begin() + begin, primitives.begin() + end, comparator);
+                secondSetBegin = begin + treeSize / 2;
+            }
         }
-
         left = std::make_shared<BVHNode>(primitives, begin, secondSetBegin, maxPrimsPerLeaf);
         right = std::make_shared<BVHNode>(primitives, secondSetBegin, end, maxPrimsPerLeaf);
     }

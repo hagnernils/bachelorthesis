@@ -40,7 +40,7 @@ public:
 
     bool hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const;
 
-    BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t begin, size_t end, int maxPrimsPerLeaf=50);
+    BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t begin, size_t end, unsigned int maxPrimsPerLeaf=50);
 
     void linearize(std::vector<LinearBVHNode> &result, size_t index);
 
@@ -56,7 +56,7 @@ private:
     std::shared_ptr<BVHNode> left = nullptr;
     std::shared_ptr<BVHNode> right = nullptr;
     std::vector<Primitive> primitives{};
-    AxisMethod axisMethod = RANDOMAXIS;
+    AxisMethod axisMethod = LONGESTAXIS;
     SplitMethod splitMethod = MEDIANCUT;
 
     void makeLeaf(const std::vector<std::shared_ptr<Primitive>> &prim,  size_t begin, size_t end);

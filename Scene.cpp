@@ -212,7 +212,7 @@ bool Scene::closestHit(Ray r, HitRecord *hitRecord) {
     return hit;
 }
 
-void Scene::buildSceneGeometry() {
+void Scene::buildSceneGeometry(unsigned int maxPrimsPerLeaf) {
     unsigned int id = 0;
     unsigned int pid = 0;
     for (auto &object : objects) {
@@ -226,7 +226,7 @@ void Scene::buildSceneGeometry() {
     }
 
 
-    bvh = BVHNode(sceneGeometry, 0, sceneGeometry.size(), 5000);
+    bvh = BVHNode(sceneGeometry, 0, sceneGeometry.size(), maxPrimsPerLeaf);
     size_t offset = 0;
     hitBVH = std::vector<LinearBVHNode>(2 << (bvh.depth() + 1));
     bvh.linearize(hitBVH, offset);

@@ -22,7 +22,7 @@ int main() {
         scene->objects[0].materialIndex = 0;
         scene->objects[1].materialIndex = 0;
         scene->sampler->seed(12345);
-        scene->buildSceneGeometry();
+        scene->buildSceneGeometry(50);
 
         scene->MeshToGnuPlotMesh();
 

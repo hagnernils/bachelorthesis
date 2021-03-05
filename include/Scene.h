@@ -42,7 +42,7 @@ public:
     void MeshToGnuPlotMesh(const std::string& filename="mesh.out.txt");
 
     // prepare the scene so rays can be traced.
-    void buildSceneGeometry();
+    void buildSceneGeometry(unsigned int maxPrimsPerLeaf);
 
     // check if a ray hits any object in the scene.
     bool closestHit(Ray r, HitRecord *hitRecord);
