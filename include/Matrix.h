@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <functional>
 #include <ostream>
+#include "Float.h"
 
 
 
@@ -42,20 +43,29 @@ public:
 
 typedef Matrix<float, 4, 4> Matrix4x4;
 
+inline Matrix<Float, 4, 1> operator*(const Matrix4x4 &lhs, const Matrix<Float, 4, 1> &rhs) {
+    Float  x,y,z,w;
+    x = lhs[ 0] * rhs[0] + lhs[ 1] * rhs[1] + lhs[ 2] * rhs[2] + lhs[ 3] * rhs[3];
+    y = lhs[ 4] * rhs[0] + lhs[ 5] * rhs[1] + lhs[ 6] * rhs[2] + lhs[ 7] * rhs[3];
+    z = lhs[ 8] * rhs[0] + lhs[ 9] * rhs[1] + lhs[10] * rhs[2] + lhs[11] * rhs[3];
+    w = lhs[12] * rhs[0] + lhs[13] * rhs[1] + lhs[14] * rhs[2] + lhs[15] * rhs[3];
+
+    return {x,y,z,w};
+}
 
 template<typename T, unsigned int M, unsigned int N, unsigned int A>
 Matrix<T, M, N> operator*(const Matrix<T,M,A> &lhs, const Matrix<T,A,N> &rhs) {
     T temp[M * N];
     for (unsigned int i = 0; i < M; i++) {
         for (unsigned int j = 0; j < N; j++) {
-            T sum = 0;
+            T sum = 0.;
             for (unsigned int k = 0; k < A; k++) {
                 sum += lhs[i * N + k] * rhs[k * A + j];
             }
             temp[i * A + j] = sum;
         }
     }
-    return Matrix4x4(temp);
+    return Matrix<T, M, N>(temp);
 }
 
 template<typename T, unsigned int M, unsigned int N>

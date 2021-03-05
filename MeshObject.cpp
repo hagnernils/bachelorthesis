@@ -32,7 +32,9 @@ std::vector<std::shared_ptr<Primitive>> MeshObject::toPrimitives() {
         for (size_t i = 0; i < indexBuffer.numElements; i++) {
             uint16_t index = *reinterpret_cast<uint16_t *>(indexBuffer.data + i * sizeof(uint16_t));
             std::memcpy(temp, positionBuffer.data + index * 3 * sizeof(float), sizeof(float) * 3);
-            vertexPositionsVector.emplace_back(temp[0], temp[1], temp[2]);
+            Matrix<Float, 4, 1> vec = {temp[0], temp[1], temp[2], 1};
+            auto worldSpace = transform * vec;
+            vertexPositionsVector.emplace_back(worldSpace[0], worldSpace[1], worldSpace[2]);
         }
 
 
