@@ -8,6 +8,7 @@
 #include <algorithm>
 #include "Aabb.h"
 #include "Primitive.h"
+#include "gtest/gtest.h"
 
 
 enum SplitMethod {
@@ -52,6 +53,7 @@ public:
     size_t depth();
     size_t numNodes();
 private:
+    FRIEND_TEST(Scene, BuildBVH);
     static std::shared_ptr<DefaultSampler> sampler;
     std::shared_ptr<BVHNode> left = nullptr;
     std::shared_ptr<BVHNode> right = nullptr;

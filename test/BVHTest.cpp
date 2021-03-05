@@ -31,7 +31,7 @@ TEST(BVH, BvhConstruction) {
     std::stringstream ss;
     ss << bvh;
     std::cerr << ss.str();
-    ASSERT_EQ(ss.str(), "BVHNode {BVHNode {Leaf with 1 primitives: {}Leaf with 1 primitives: {}}BVHNode {Leaf with 1 primitives: {}Leaf with 1 primitives: {}}}");
+    ASSERT_EQ(ss.str(), "BVHNode {BVHNode {Leaf (1) Leaf (1) }BVHNode {Leaf (1) Leaf (1) }}");
 
     std::vector<LinearBVHNode> linearBvh(2 << (bvh.depth() + 1));
     bvh.linearize(linearBvh, 0);

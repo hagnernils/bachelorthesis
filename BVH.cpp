@@ -92,10 +92,7 @@ void BVHNode::makeLeaf(const std::vector<std::shared_ptr<Primitive>> &prims, siz
 
 std::ostream &operator<<(std::ostream &os, const BVHNode &b) {
     if (!b.primitives.empty()) {
-        os << "Leaf with " << b.primitives.size() << " primitives: {";
-        //for (auto p: b.primitives)
-        //    os << p << " ";
-        return os << "}";
+        return os << "Leaf (" << b.primitives.size() << ") ";
     } else {
         os << "BVHNode {";
         os << *b.left;
