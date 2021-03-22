@@ -187,29 +187,15 @@ bool Scene::closestHit(Ray r, HitRecord *hitRecord) {
     Float tMin = 0;
     Float tMax = 1e16f;
     bool hit = false;
+#ifndef EXHAUSTIVE_INTERSECTION
     hit = bvh.hit(r, tMin, tMax, hitRecord);
-
-    /*
+#else
     for (auto &p: sceneGeometry)
         if (p->hit(r, tMin, tMax, hitRecord)) {
             tMax = hitRecord->time;
             hit = true;
         }
-    /*
-    auto currentNodeIndex = 0;
-    while (true) {
-        auto currentNode = hitBVH[currentNodeIndex];
-        if (currentNode.bounds.hit(r, 0, rayMax, hitRecord)) {
-            if (!currentNode.primitives.empty()) {
-                for (auto &p : currentNode.primitives) {
-                    if (p.hit(r, 0, rayMax, hitRecord))
-                        hit = true;
-                }
-                if ()
-            }
-        }
-    }
-     */
+#endif
     return hit;
 }
 
