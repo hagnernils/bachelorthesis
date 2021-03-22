@@ -13,7 +13,7 @@ Primitive::Primitive() = default;
 #define EPS 0.00001
 inline bool muellerTrumboreTriangleIntersect(const Float3 rayOrigin, const Float3 rayDir, Float &rayTime,
                                              const Float3 v0, const Float3 v1, const Float3 v2 , Float &u, Float &v) {
-    Float3 edge1, edge2, t, p, q;
+    Float3 edge1, edge2, s, p, q;
     Float det, invDet;
 
     edge1 = v1 - v0;
@@ -23,17 +23,17 @@ inline bool muellerTrumboreTriangleIntersect(const Float3 rayOrigin, const Float
 
     det = edge1.dot(p);
 
-    if (det > -EPS && det < EPS)
+    if (det > -EPS && det < EPS) // check if ray is parallel
         return false;
     invDet = 1.0 / det;
 
-    t = rayOrigin - v0;
+    s = rayOrigin - v0;
 
-    u = t.dot(p) * invDet;
+    u = s.dot(p) * invDet;
     if (u < 0.0 || u > 1.0)
         return false;
 
-    q = Float3::cross(t, edge1);
+    q = Float3::cross(s, edge1);
 
     v = rayDir.dot(q) * invDet;
     if (v < 0.0 || u + v > 1.0)
@@ -61,7 +61,7 @@ inline Float3 sampleTriangle2(const Float3 &a, const Float3 &b, const Float3 &c,
     return A * a + s * b + t * c;
 }
 
-[[nodiscard]] bool Primitive::hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const {
+bool Primitive::hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const {
     Float u, v;
 
     Float time = 0;

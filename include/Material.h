@@ -7,6 +7,12 @@
 #include <string>
 #include "HitRecord.h"
 
+enum RaySurfaceInteraction {
+    ABSORPTION = 0,
+    SPECULAR_REFLECTION = 1,
+    DIFFUSE_REFLECTION = 2,
+};
+
 struct Material {
     std::string name;
     float absorption = 1.f; // equals emission according to Kirchhoffs law

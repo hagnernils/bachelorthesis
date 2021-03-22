@@ -37,7 +37,7 @@ BufferView<T> AccessorToBufferView(Scene &scene, const int accessorIndex, const 
 }
 
 
-void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, Matrix4x4 parentTransform) {
+void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, const Matrix4x4 &parentTransform) {
     std::cerr << "Parent transform is " << parentTransform;
 
     auto node = model.nodes[nodeIndex];
@@ -141,7 +141,7 @@ void Scene::loadGLTF(const std::string &filename) {
 
     // Save buffers to scene
     for (const auto &b : model.buffers) {
-        buffers.emplace_back(Buffer<u_char>{b.name, b.data});
+        buffers.emplace_back(b.name, b.data);
     }
 
     // Add materials
@@ -187,8 +187,9 @@ bool Scene::closestHit(Ray r, HitRecord *hitRecord) {
     Float tMin = 0;
     Float tMax = 1e16f;
     bool hit = false;
-    //hit = bvh.hit(r, tMin, tMax, hitRecord);
+    hit = bvh.hit(r, tMin, tMax, hitRecord);
 
+    /*
     for (auto &p: sceneGeometry)
         if (p->hit(r, tMin, tMax, hitRecord)) {
             tMax = hitRecord->time;

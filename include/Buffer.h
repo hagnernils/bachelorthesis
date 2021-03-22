@@ -6,12 +6,15 @@
 #define BACHELORTHESIS_BUFFER_H
 
 #include <string>
+#include <utility>
 #include <vector>
 
 template<typename T>
 struct Buffer {
     std::string name;
     std::vector<T> data;
+
+    Buffer(std::string name, const std::vector<T> &data) : name(std::move(name)), data(data) {}
 };
 typedef Buffer<u_char> ByteBuffer;
 

@@ -13,7 +13,7 @@ struct Aabb {
     Float3 max;
 
     Aabb() : min({0,0,0}), max({0,0,0}) {};
-
+    Aabb(const Aabb &other) : min(other.min), max(other.max) {}
     Aabb(const Float3 &min, const Float3 &max) : min(min), max(max) {}
     Aabb(const Float minX, const Float minY, const Float minZ,
          const Float maxX, const Float maxY, const Float maxZ) : min({minX, minY, minZ}), max({maxX, maxY, maxZ}) {}
@@ -24,8 +24,8 @@ struct Aabb {
         auto baseToMin = min - ray.base;
         auto baseToMax = max - ray.base;
         for (auto i = 0; i < 3; i++) {
-            auto t0 = inverseDirection[i] * (baseToMin()[i]);
-            auto t1 = inverseDirection[i] * (baseToMax()[i]);
+            auto t0 = inverseDirection[i] * (baseToMin[i]);
+            auto t1 = inverseDirection[i] * (baseToMax[i]);
             if (inverseDirection[i] < 0.0)
                 std::swap(t0, t1);
             tMin = t0 > tMin ? t0 : tMin;
@@ -72,6 +72,10 @@ struct Aabb {
 
     bool operator==(const Aabb& other) const {
         return min == other.min && max == other.max;
+    }
+
+    bool operator!=(const Aabb& other) const {
+        return !(*this == other);
     }
 };
 

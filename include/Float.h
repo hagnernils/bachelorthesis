@@ -9,31 +9,42 @@
 #include <ostream>
 #include <cmath>
 
+
+template <typename T, unsigned int n>
+struct Vector {
+    T data[n];
+};
+
+typedef float Float;
+
+typedef Vector<Float, 3> Vec3;
+
 template<typename T>
-struct Vec3 {
-    T x;
-    T y;
-    T z;
+struct Vector<T, 3> {
+    union {
+        T data[3];
+        struct { T x, y, z; };
+    };
 
-    Vec3() = default;
+    Vector() = default;
 
-    Vec3(T x, T y, T z) : x(x), y(y), z(z) {}
+    constexpr Vector(const Vector& v) : x(v.x), y(v.y), z(v.z) {}
 
-    Vec3(const Vec3& v) : x(v.x), y(v.y), z(v.z) {}
+    constexpr Vector(const Vector&& v)  noexcept : x(v.x), y(v.y), z(v.z) {}
 
-    Vec3(std::initializer_list<T> &list) {
-        if (list.size() == 3) {
-            x = list[0];
-            y = list[1];
-            z = list[2];
-        }
+    Vector(T a, T b, T c) : x(a), y(b), z(c) {}
+
+    Vector(std::initializer_list<T> &list) {
+        auto i = 0;
+        for (auto val : list)
+            data[i++] = val;
     }
 
-    inline T dot(const Vec3<T> &v) const {
+    inline T dot(const Vector<T, 3> &v) const {
         return x * v.x + y * v.y + z * v.z;
     }
 
-    inline Vec3<T> normalize() {
+    inline Vector<T, 3> normalize() {
         T length = this->length();
         y /= length;
         z /= length;
@@ -41,13 +52,13 @@ struct Vec3 {
         return *this;
     }
 
-    inline static Vec3<T> cross(const Vec3<T> &a, const Vec3<T> &b) {
+    inline static Vector<T, 3> cross(const Vector<T, 3> &a, const Vector<T, 3> &b) {
         return Vec3(a.y * b.z - a.z * b.y,
                     a.z * b.x - a.x * b.z,
                     a.x * b.y - a.y * b.x);
     }
 
-    inline static T length(const Vec3<T> &v) {
+    inline static T length(const Vector<T, 3> &v) {
         return std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
     }
 
@@ -55,7 +66,7 @@ struct Vec3 {
         return std::sqrt(x * x + y * y + z * z);
     }
 
-    friend std::ostream &operator<<(std::ostream &os, const Vec3<T> v) {
+    friend std::ostream &operator<<(std::ostream &os, const Vector<T, 3> v) {
         os << std::setprecision(8) << std::fixed << std::showpoint;
         return os << "Float3 {" << v.x << ", " << v.y << ", " << v.z << "}";
     }
@@ -67,24 +78,38 @@ struct Vec3 {
         return ss.str();
     }
 
-    std::array<T, 3> operator()() const {
-        return {x, y, z};
+    inline T &operator[](size_t index) {
+        return data[index];
     }
 
-    inline Vec3<T> &operator-() {
+    inline T operator[](size_t index) const {
+        return data[index];
+    }
+
+    inline Vector<T, 3> &operator-() {
         x = -x;
         y = -y;
         z = -z;
         return *this;
     }
 
-    inline void operator-=(const Vec3<T> &v) {
+    constexpr inline Vector<T, 3> &operator=(const Vector<T, 3> &other) {
+        if (this == &other)
+            return *this;
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+
+    inline void operator-=(const Vector<T, 3> &v) {
         x -= v.x;
         y -= v.y;
         z -= v.z;
     }
 
-    inline void operator+=(const Vec3<T> &v) {
+    inline void operator+=(const Vector<T, 3> &v) {
         x += v.x;
         y += v.y;
         z += v.z;
@@ -102,60 +127,56 @@ struct Vec3 {
         z /= divisor;
     }
 
-    inline bool operator==(const Vec3<T> &v) const {
+    inline bool operator==(const Vector<T, 3> &v) const {
         return x == v.x
                && y == v.y
                && z == v.z;
     }
 
-    inline bool operator!=(const Vec3<T> &v) const {
+    inline bool operator!=(const Vector<T, 3> &v) const {
         return x != v.x
                || y != v.y
                || z != v.z;
     }
 };
 
-typedef float Float;
-typedef Vec3<float> Float3;
+typedef Vector<float, 3> Float3;
+
 
 template<typename T>
-inline Vec3<T> operator-(const Vec3<T> &lhs, const Vec3<T> &rhs) {
-    return Vec3<T>(lhs.x - rhs.x,
-                lhs.y - rhs.y,
-                lhs.z - rhs.z);
+constexpr inline Vector<T, 3> operator-(const Vector<T, 3> &lhs, const Vector<T, 3> &rhs) {
+    return {lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z};
 }
 
 template<typename T>
-inline Vec3<T> operator+(const Vec3<T> &lhs, const Vec3<T> &rhs) {
-    return Vec3<T>(lhs.x + rhs.x,
-                lhs.y + rhs.y,
-                lhs.z + rhs.z);
+constexpr inline Vector<T, 3> operator+(const Vector<T, 3> &lhs, const Vector<T, 3> &rhs) {
+    return {lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z};
 }
 
 template<typename T1, typename T2>
-inline Vec3<T2> operator*(const Vec3<T2> &v, const T1 factor) {
-    return Vec3<T2>(v.x * factor, v.y * factor, v.z * factor);
+inline Vector<T2, 3> operator*(const Vector<T2, 3> &v, const T1 factor) {
+    return Vector<T2, 3>(v.x * factor, v.y * factor, v.z * factor);
 }
 
 template<typename T1, typename T2>
-inline Vec3<T2> operator*(const T1 factor, const Vec3<T2> &v) {
+inline Vector<T2, 3> operator*(const T1 factor, const Vector<T2, 3> &v) {
     return v * factor;
 }
 
 template<typename T>
-inline T operator*(const Vec3<T> &lhs, const Vec3<T> &rhs) {
+inline T operator*(const Vector<T, 3> &lhs, const Vector<T, 3> &rhs) {
     return lhs.dot(rhs);
 }
 
 template<typename T>
-inline Vec3<T> operator/(const Vec3<T> &v, const T divisor) {
-    return Vec3<T>(v.x / divisor,
+inline Vector<T, 3> operator/(const Vector<T, 3> &v, const T divisor) {
+    return Vector<T, 3>(v.x / divisor,
                 v.y / divisor,
                 v.z / divisor);
 }
 
 template<typename T>
-inline Vec3<T> normalize(Vec3<T> &vec) {
+inline Vector<T, 3> normalize(Vector<T, 3> &vec) {
     T length = vec.length();
     vec.y /= length;
     vec.z /= length;

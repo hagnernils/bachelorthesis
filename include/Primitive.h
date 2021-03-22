@@ -16,22 +16,14 @@
 #include "HitRecord.h"
 
 
-
-class hitInterface {
-public:
-    [[nodiscard]] virtual bool hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const = 0;
-    Aabb bounds;
-};
-
-
-class Primitive : public hitInterface {
+class Primitive {
 public:
     Primitive();
 
-    Primitive(Float3 a, Float3 b, Float3 c, Float3 n, std::shared_ptr<MeshObject> parent)
+    Primitive(const Float3& a, const Float3& b, const Float3& c, Float3 n, MeshObject *parent)
             : a(a), b(b), c(c),
               normal(n),
-              parent(std::move(parent)) {
+              parent(parent) {
         normal.normalize();
         bounds.min.x = std::min({a.x, b.x, c.x});
         bounds.min.y = std::min({a.y, b.y, c.y});
@@ -41,12 +33,10 @@ public:
         bounds.max.z = std::max({a.z, b.z, c.z});
     };
 
-    Primitive(Float3 a, Float3 b, Float3 c, std::shared_ptr<MeshObject> parent)
-            : Primitive(a, b, c,
-                        Float3::cross(b - a, c - a),
-                        std::move(parent)) {};
+    Primitive(const Float3& a, const Float3& b, const Float3& c, MeshObject *parent)
+                : Primitive(a, b, c, Float3::cross(b - a, c - a), parent) {};
 
-    [[nodiscard]] bool hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const override;
+    bool hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const;
 
     friend std::ostream &operator<<(std::ostream &stream, Primitive &prim);
 
@@ -62,7 +52,8 @@ public:
         return ((b - a).length() + (c - a).length()) * 0.5;
     }
 
-    std::shared_ptr<MeshObject> parent;
+    Aabb bounds;
+    MeshObject *parent = nullptr;
     Float3 a, b, c;
     Float3 normal;
     size_t Id;

@@ -28,39 +28,38 @@ BVHNode::BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t beg
     if (treeSize <= maxPrimsPerLeaf) {
         makeLeaf(primitives, begin, end);
         return;
-    } else {
-        Aabb centroidBounds = {primitives[begin]->bounds.center(), primitives[begin]->bounds.center()};
-        size_t splitAxis;
-        Float splitValue;
-        size_t secondSetBegin;
-
-        for (auto i = begin; i < end; i++) {
-            centroidBounds += primitives[i]->bounds.center();
-        }
-        if (axisMethod == LONGESTAXIS) {
-            splitAxis = centroidBounds.longestAxis();
-        } else if (axisMethod == RANDOMAXIS) {
-            splitAxis = sampler->uniformInt(0, 2);
-        }
-        switch (splitMethod) {
-            case MIDPOINT: {
-                splitValue = ((centroidBounds.min + centroidBounds.max) / 2.f)()[splitAxis];
-                auto partitioner = [splitAxis, splitValue](std::shared_ptr<Primitive> &p){ return p->bounds.center()()[splitAxis] < splitValue; };
-                auto partition = std::partition(primitives.begin() + begin, primitives.begin() + end, partitioner);
-                secondSetBegin = partition - primitives.begin();
-                if (secondSetBegin != treeSize)  // fallback to median cut if all primitives lie on the same value of the chosen axis
-                    break;
-            }
-            case MEDIANCUT: {
-                auto comparator = [splitAxis](std::shared_ptr<Primitive> &p1,
-                                              std::shared_ptr<Primitive> &p2){ return p1->bounds.center()()[splitAxis] < p2->bounds.center()()[splitAxis]; };
-                std::sort(primitives.begin() + begin, primitives.begin() + end, comparator);
-                secondSetBegin = begin + treeSize / 2;
-            }
-        }
-        left = std::make_shared<BVHNode>(primitives, begin, secondSetBegin, maxPrimsPerLeaf);
-        right = std::make_shared<BVHNode>(primitives, secondSetBegin, end, maxPrimsPerLeaf);
     }
+    Aabb centroidBounds = {primitives[begin]->bounds.center(), primitives[begin]->bounds.center()};
+    size_t splitAxis;
+    Float splitValue;
+    size_t secondSetBegin;
+
+    for (auto i = begin; i < end; i++) {
+        centroidBounds += primitives[i]->bounds.center();
+    }
+    if (axisMethod == LONGESTAXIS) {
+        splitAxis = centroidBounds.longestAxis();
+    } else if (axisMethod == RANDOMAXIS) {
+        splitAxis = sampler->uniformInt(0, 2);
+    }
+    switch (splitMethod) {
+        case MIDPOINT: {
+            splitValue = centroidBounds.center()[splitAxis];
+            auto partitioner = [splitAxis, splitValue](std::shared_ptr<Primitive> &p){ return p->bounds.center()[splitAxis] < splitValue; };
+            auto partition = std::partition(primitives.begin() + begin, primitives.begin() + end, partitioner);
+            secondSetBegin = partition - primitives.begin();
+            if (secondSetBegin != treeSize)  // fallback to median cut if all primitives lie on the same value of the chosen axis
+                break;
+        }
+        case MEDIANCUT: {
+            auto comparator = [splitAxis](std::shared_ptr<Primitive> &p1,
+                                          std::shared_ptr<Primitive> &p2){ return p1->bounds.center()[splitAxis] < p2->bounds.center()[splitAxis]; };
+            std::sort(primitives.begin() + begin, primitives.begin() + end, comparator);
+            secondSetBegin = begin + treeSize / 2;
+        }
+    }
+    left = std::make_shared<BVHNode>(primitives, begin, secondSetBegin, maxPrimsPerLeaf);
+    right = std::make_shared<BVHNode>(primitives, secondSetBegin, end, maxPrimsPerLeaf);
 }
 
 bool BVHNode::hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const {
@@ -69,7 +68,7 @@ bool BVHNode::hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const 
 
     if (isLeaf()) {
         bool hit = false;
-        for (auto &p: primitives) {
+        for (const Primitive &p: primitives) {
             if (p.hit(ray, tMin, tMax, hitRecord)) {
                 tMax = hitRecord->time;
                 hit = true;

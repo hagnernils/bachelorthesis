@@ -23,19 +23,15 @@ public:
     std::shared_ptr<DefaultSampler> sampler;
     std::shared_ptr<Scene> scene = nullptr;
 
-    const unsigned int samplesPerPrimitive = 10000;
+    unsigned int samplesPerPrimitive = 10000;
 
     std::vector<AbsorbedEnergySpectrum> estimateAbsorption();
 
 private:
     // send one global sample and calculate its absorption
-    std::pair<size_t, Float> estimateAbsorption(Primitive &emittingPrimitive);
+    std::pair<AbsorptionIndex, Float> estimateAbsorption(Primitive &emittingPrimitive, Float &pdf, bool front=true);
 
-    std::pair<AbsorptionIndex, Float> reflectDiffuse(HitRecord &hitRecord, Ray &ray);
-
-    std::pair<AbsorptionIndex, Float> reflectSpecular(HitRecord &hitRecord, Ray &ray);
-
-    std::pair<AbsorptionIndex, Float> estimateAbsorptionAtRay(HitRecord &hitRecord, Ray &ray);
+    std::pair<AbsorptionIndex, Float> estimateAbsorptionAtRay(HitRecord &hitRecord, Ray &ray, float &depth);
 };
 
 #endif //BACHELORTHESIS_ESTIMATOR_H

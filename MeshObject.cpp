@@ -27,25 +27,24 @@ std::vector<std::shared_ptr<Primitive>> MeshObject::toPrimitives() {
         const auto positionBuffer = positions[subMeshIndex];
         const auto indexBuffer = indices[subMeshIndex];
 
-        std::vector<Float3> vertexPositionsVector;
-        float temp[3];
+        std::vector<Float3> vertexPositionsVector(indexBuffer.numElements);
+        float temp[3] = {};
         for (size_t i = 0; i < indexBuffer.numElements; i++) {
             uint16_t index = *reinterpret_cast<uint16_t *>(indexBuffer.data + i * sizeof(uint16_t));
             std::memcpy(temp, positionBuffer.data + index * 3 * sizeof(float), sizeof(float) * 3);
             Matrix<Float, 4, 1> vec = {temp[0], temp[1], temp[2], 1};
             auto worldSpace = transform * vec;
-            vertexPositionsVector.emplace_back(worldSpace[0], worldSpace[1], worldSpace[2]);
+            vertexPositionsVector[i] = {worldSpace[0], worldSpace[1], worldSpace[2]};
         }
 
 
         const size_t numIndexTriplets = indexBuffer.numElements / 3;
 
         for (unsigned int i = 0; i < numIndexTriplets; i++) {
-            auto p = std::make_shared<Primitive>(vertexPositionsVector[3 * i + 0],
+            prims.push_back(std::make_shared<Primitive>(vertexPositionsVector[3 * i + 0],
                                vertexPositionsVector[3 * i + 1],
                                vertexPositionsVector[3 * i + 2],
-                               std::make_shared<MeshObject>(*this));
-            prims.push_back(p);
+                               this));
         }
     }
 
