@@ -17,11 +17,11 @@ class Primitive;
 
 class MeshObject {
 public:
-    std::string name;
+    std::string name = "MeshObject";
     // the material in the scene that object is assigned
     size_t materialIndex = 0;
     size_t objectID = 0; // TODO: use this in hit function to put into correct bin
-    Matrix4x4 transform;
+    Matrix4x4 transform = Matrix4x4::identity();
     Aabb aabb;
     std::vector<ByteBufferView> indices;
     std::vector<ByteBufferView> positions;

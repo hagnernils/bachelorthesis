@@ -20,6 +20,7 @@ public:
     Matrix();
     explicit Matrix(const float other[M * N]) { for(unsigned int i = 0; i < M * N; i++) data[i] = other[i];}
     explicit Matrix(const T val);
+    Matrix(const Matrix<T, M, N> &other) { *this = other; }
     Matrix(const std::initializer_list<T>& list);
 
     T operator[](unsigned int i) const { return data[i]; }

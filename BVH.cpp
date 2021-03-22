@@ -85,8 +85,6 @@ bool BVHNode::hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const 
 void BVHNode::makeLeaf(const std::vector<std::shared_ptr<Primitive>> &prims, size_t begin, size_t end) {
     for (auto i = begin; i < end; i++)
         primitives.push_back(*prims[i]);
-    left = nullptr;
-    right = nullptr;
 }
 
 std::ostream &operator<<(std::ostream &os, const BVHNode &b) {
