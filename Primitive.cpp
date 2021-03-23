@@ -11,7 +11,7 @@ Primitive::Primitive() = default;
 // Möller, Tomas, and Ben Trumbore. 1997. „Fast, minimum storage ray-triangle intersection“. Journal of Graphics Tools 2 (1): 21–28.
 // https://doi.org/10.1080/10867651.1997.10487468.
 #define EPS 0.00001
-inline bool muellerTrumboreTriangleIntersect(const Float3 rayOrigin, const Float3 rayDir, Float &rayTime,
+inline bool muellerTrumboreTriangleIntersect(const Float3 &rayOrigin, const Float3 &rayDir, Float &rayTime,
                                              const Float3 v0, const Float3 v1, const Float3 v2 , Float &u, Float &v) {
     Float3 edge1, edge2, s, p, q;
     Float det, invDet;
@@ -71,15 +71,20 @@ bool Primitive::hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) cons
 
     if (!valid) return false;
 
-    ray.time = time;
-    hitRecord->u = u;
-    hitRecord->v = v;
+    hitRecord->point = atUV(u, v);
     hitRecord->time = time;
+#ifdef GTEST_INCLUDE_GTEST_GTEST_H_
     if (parent != nullptr) {
         hitRecord->MaterialIndex = parent->materialIndex;
         hitRecord->ObjectIndex = parent->objectID;
     }
+#else
+    hitRecord->MaterialIndex = parent->materialIndex;
+    hitRecord->ObjectIndex = parent->objectID;
+#endif
+#ifdef VERBOSE
     hitRecord->primitiveIndex = Id;
+#endif
     hitRecord->normal = normal;
 
     return true;

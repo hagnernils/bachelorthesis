@@ -14,7 +14,6 @@ struct HitRecord {
     size_t ObjectIndex;  // the object that was hit
     size_t primitiveIndex;  // the prim that was hit
     size_t MaterialIndex;
-    Float u, v;
 };
 
 #endif //BACHELORTHESIS_HITRECORD_H
