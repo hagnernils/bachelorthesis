@@ -18,38 +18,34 @@ struct Vector {
 typedef float Float;
 
 typedef Vector<Float, 3> Vec3;
+typedef Vector<float, 3> Float3;
 
 template<typename T>
 struct Vector<T, 3> {
     union {
-        T data[3];
+        std::array<T, 3> data;
         struct { T x, y, z; };
     };
 
     Vector() = default;
+    ~Vector() = default;
 
-    constexpr Vector(const Vector& v) : x(v.x), y(v.y), z(v.z) {}
+    Vector(const Vector&& v)  noexcept : data(std::move(v.data)) {}
 
-    constexpr Vector(const Vector&& v)  noexcept : x(v.x), y(v.y), z(v.z) {}
+    explicit Vector(const Vector<T, 3> &v) : data(v.data) {}
 
-    Vector(T a, T b, T c) : x(a), y(b), z(c) {}
+    Vector<T, 3>(T x, T y, T z) : data({x,y,z}) {}
 
-    Vector(std::initializer_list<T> &list) {
-        auto i = 0;
-        for (auto val : list)
-            data[i++] = val;
+    Vector(std::initializer_list<T> list) {
+        std::copy(list.begin(), list.end(), data.begin());
     }
 
     inline T dot(const Vector<T, 3> &v) const {
         return x * v.x + y * v.y + z * v.z;
     }
 
-    inline Vector<T, 3> normalize() {
-        T length = this->length();
-        y /= length;
-        z /= length;
-        x /= length;
-        return *this;
+    inline Vector<T, 3> &normalize() {
+        return operator/=(length());
     }
 
     inline static Vector<T, 3> cross(const Vector<T, 3> &a, const Vector<T, 3> &b) {
@@ -96,66 +92,67 @@ struct Vector<T, 3> {
     constexpr inline Vector<T, 3> &operator=(const Vector<T, 3> &other) {
         if (this == &other)
             return *this;
-        x = other.x;
-        y = other.y;
-        z = other.z;
+        data[0] = other.data[0];
+        data[1] = other.data[1];
+        data[2] = other.data[2];
         return *this;
     }
 
 
-    inline void operator-=(const Vector<T, 3> &v) {
+    inline Vector<T, 3> &operator-=(const Vector<T, 3> &v) {
         x -= v.x;
         y -= v.y;
         z -= v.z;
+        return *this;
     }
 
-    inline void operator+=(const Vector<T, 3> &v) {
+    inline Vector<T, 3> &operator+=(const Vector<T, 3> &v) {
         x += v.x;
         y += v.y;
         z += v.z;
+        return *this;
     }
 
-    inline void operator*=(const T &factor) {
+    inline Vector<T, 3> &operator*=(const T &factor) {
         x *= factor;
         y *= factor;
         z *= factor;
+        return *this;
     }
 
-    inline void operator/=(const T &divisor) {
+    inline Vector<T, 3> &operator/=(const T &divisor) {
         x /= divisor;
         y /= divisor;
         z /= divisor;
+        return *this;
     }
 
-    inline bool operator==(const Vector<T, 3> &v) const {
+    bool operator==(const Vector<T, 3> &v) const {
         return x == v.x
                && y == v.y
                && z == v.z;
     }
 
-    inline bool operator!=(const Vector<T, 3> &v) const {
+    bool operator!=(const Vector<T, 3> &v) const {
         return x != v.x
                || y != v.y
                || z != v.z;
     }
 };
 
-typedef Vector<float, 3> Float3;
-
-
 template<typename T>
-constexpr inline Vector<T, 3> operator-(const Vector<T, 3> &lhs, const Vector<T, 3> &rhs) {
-    return {lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z};
+inline Vector<T, 3> operator-(Vector<T, 3> lhs, const Vector<T, 3> &rhs) {
+    lhs -= rhs; return lhs;
 }
 
 template<typename T>
-constexpr inline Vector<T, 3> operator+(const Vector<T, 3> &lhs, const Vector<T, 3> &rhs) {
-    return {lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z};
+inline Vector<T, 3> operator+(Vector<T, 3> lhs, const Vector<T, 3> &rhs) {
+    lhs += rhs; return lhs;
 }
 
 template<typename T1, typename T2>
-inline Vector<T2, 3> operator*(const Vector<T2, 3> &v, const T1 factor) {
-    return Vector<T2, 3>(v.x * factor, v.y * factor, v.z * factor);
+inline Vector<T2, 3> operator*(Vector<T2, 3> v, const T1 factor) {
+    v *= factor; return v;
 }
 
 template<typename T1, typename T2>
@@ -164,24 +161,13 @@ inline Vector<T2, 3> operator*(const T1 factor, const Vector<T2, 3> &v) {
 }
 
 template<typename T>
-inline T operator*(const Vector<T, 3> &lhs, const Vector<T, 3> &rhs) {
-    return lhs.dot(rhs);
+inline Vector<T, 3> operator/(Vector<T, 3> v, const T divisor) {
+    v /= divisor; return v;
 }
 
 template<typename T>
-inline Vector<T, 3> operator/(const Vector<T, 3> &v, const T divisor) {
-    return Vector<T, 3>(v.x / divisor,
-                v.y / divisor,
-                v.z / divisor);
-}
-
-template<typename T>
-inline Vector<T, 3> normalize(Vector<T, 3> &vec) {
-    T length = vec.length();
-    vec.y /= length;
-    vec.z /= length;
-    vec.x /= length;
-    return vec;
+inline Vector<T, 3> operator/(const T divisor, Vector<T, 3> v) {
+    v /= divisor; return v;
 }
 
 #endif //BACHELORTHESIS_FLOAT_H
