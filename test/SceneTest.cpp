@@ -26,12 +26,14 @@ TEST(Scene, BuildBVH) {
     {
         Scene scene;
         scene.loadGLTF("sceneTriangleTest.gltf");
-        scene.buildSceneGeometry(1);
+        BVHNode::setConstructionOptions(1);
+        scene.buildSceneGeometry();
     }
     {
         Scene scene;
         scene.loadGLTF("bvhtest.gltf");
-        scene.buildSceneGeometry(2);
+        BVHNode::setConstructionOptions(2, SplitMethod::MEDIANCUT, AxisMethod::LONGESTAXIS);
+        scene.buildSceneGeometry();
 
         std::stringstream ss;
         ss << scene.bvh;
@@ -61,7 +63,8 @@ TEST(Scene, BuildBVH) {
     {
         Scene scene1;
         scene1.loadGLTF("bvhtest2.gltf");
-        scene1.buildSceneGeometry(1);
+        BVHNode::setConstructionOptions(1);
+        scene1.buildSceneGeometry();
         std::stringstream ss;
         ss << scene1.bvh;
         ASSERT_EQ(ss.str(), "BVHNode {"

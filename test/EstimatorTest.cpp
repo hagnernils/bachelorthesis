@@ -9,7 +9,8 @@
 TEST(Estimate, EstimatorRectangleToRectangle) {
     auto scene = std::make_shared<Scene>();
     scene->loadGLTF("twoSquares.gltf");
-    scene->buildSceneGeometry(500);
+    scene->buildSceneGeometry();
+    scene->materials = {Material("defaultBB")};
     Estimator estimator(scene);
     estimator.sampler->seed(1234);
 

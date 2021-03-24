@@ -14,7 +14,7 @@ TEST (Primtive, PrimitiveConstructorNormalCalculation) {
     Primitive prim = Primitive(Float3(0, 0, 0),
                                Float3(1, 0, 0),
                                Float3(0, 1, 0),
-                               parent);
+                               parent.get());
 
     EXPECT_EQ(prim.normal, Float3(0, 0, 1));
 
@@ -54,7 +54,7 @@ TEST (Primtive, TriangleHitTMinTMax) {
 
     bool result = prim.hit(ray, -1, 2, &hr);
     EXPECT_EQ(result, true);
-    EXPECT_FLOAT_EQ(ray.time, 1);
+    EXPECT_FLOAT_EQ(hr.time, 1);
 }
 
 TEST (Primtive, TriangleSampleArea) {

@@ -10,6 +10,7 @@ TEST(BVH, BvhConstruction) {
     auto sampler = std::make_shared<DefaultSampler>();
     sampler->seed(12345);
     bvh.setSampler(sampler);
+    bvh.setConstructionOptions(1);
     std::vector<std::shared_ptr<Primitive>> primitives;
 
     // construct prims like this:
@@ -26,7 +27,7 @@ TEST(BVH, BvhConstruction) {
         primitives.emplace_back(std::make_shared<Primitive>(a2, b2, c2, nullptr));
         primitives.emplace_back(std::make_shared<Primitive>(a3, b3, c3, nullptr));
     }
-    bvh = BVHNode(primitives, 0, primitives.size(), 1);
+    bvh = BVHNode(primitives, 0, primitives.size());
 
     std::stringstream ss;
     ss << bvh;
