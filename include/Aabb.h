@@ -18,7 +18,7 @@ struct Aabb {
     Aabb(const Float minX, const Float minY, const Float minZ,
          const Float maxX, const Float maxY, const Float maxZ) : min({minX, minY, minZ}), max({maxX, maxY, maxZ}) {}
 
-    bool hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const {
+    bool hit(const Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const {
         // TODO: factor out
         Float inverseDirection[3] = {static_cast<Float>(1. / ray.dir.x), static_cast<Float>(1. / ray.dir.y), static_cast<Float>(1. / ray.dir.z)};
         auto baseToMin = min - ray.base;

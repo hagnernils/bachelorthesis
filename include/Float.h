@@ -32,7 +32,7 @@ struct Vector<T, 3> {
 
     Vector(const Vector&& v)  noexcept : data(std::move(v.data)) {}
 
-    explicit Vector(const Vector<T, 3> &v) : data(v.data) {}
+    Vector(const Vector<T, 3> &v) : data(v.data) {}
 
     Vector<T, 3>(T x, T y, T z) : data({x,y,z}) {}
 

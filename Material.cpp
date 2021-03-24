@@ -15,7 +15,6 @@ Material::Material(std::string name, float absorption, float specularReflection,
 }
 
 RaySurfaceInteraction Material::interact(float rand) {
-
     for (int i = 0; i < 3; i++) {
         if (cdf[i] >= rand) {
             return static_cast<RaySurfaceInteraction>(i);
