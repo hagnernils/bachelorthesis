@@ -19,14 +19,13 @@ std::vector<AbsorbedEnergySpectrum> Estimator::estimateAbsorption() {
 
         std::cerr << "primitive " << scene->objects[i].name << " with Area " << nodeSurfaceArea << std::endl;
 
-        #pragma omp parallel for default(none) shared(prims, nodeCount, nodeSurfaceArea, nodeSpectrum, samplesPerPrimitive)
+        #pragma omp parallel for default(none) shared(prims, nodeCount, nodeSurfaceArea, nodeSpectrum)
         for (auto &prim : prims) {
             auto primitiveSpectrum = AbsorbedEnergySpectrum(nodeCount + 1);
             for (unsigned int j = 0; j < samplesPerPrimitive; j++) {
-                // TODO: get sampleWeight, like this samples are weighted uniformly
-                Float pdf = 1. / samplesPerPrimitive ;
+                Float pdf = 1. / samplesPerPrimitive;
                 auto estimate = estimateAbsorption(*prim, pdf);
-                primitiveSpectrum[estimate.first] += estimate.second * pdf;
+                primitiveSpectrum[estimate.first] = primitiveSpectrum[estimate.first] + estimate.second;
             }
             // we assume even emittance over mesh, so scale emitted intensity of primitive with its percentage of the whole
             // node area
@@ -66,39 +65,43 @@ std::pair<AbsorptionIndex, Float> Estimator::estimateAbsorption(Primitive &emitt
     #pragma omp critical
         std::cout << ray.base.toString() << " " << ray.dir.toString() << std::endl;
     #endif
-    float depth = 10;
-    return estimateAbsorptionAtRay(hitRecord, ray, depth);
+    auto depth = traceDepth;
+    return estimateAbsorptionAtRay(hitRecord, ray, pdf, depth);
 }
 
-std::pair<AbsorptionIndex, Float> Estimator::estimateAbsorptionAtRay(HitRecord &hitRecord, Ray &ray, float &depth) {
-    if (--depth >= 0 && scene->closestHit(ray, &hitRecord)) {
-        // TODO: check if hit itself
-        // TODO: check weighting of these samples! like the *pdf set in http://www.pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Reflection_Functions.html#BSDF::Sample_f
-        auto rayInteraction = scene->materials[hitRecord.MaterialIndex].interact(sampler->getCanonical());
-        switch (rayInteraction) {
-            case ABSORPTION:
-#ifdef VERBOSE
-                //#pragma omp critical
-                //std::cerr << "emitted from " << ray << " absorbed at " << hitRecord.primitiveIndex << std::endl;
-#endif
-                return std::make_pair(hitRecord.ObjectIndex, ray.intensity);
-            case DIFFUSE_REFLECTION: {
-                // reflect diffusely with the tangent sphere method
-                auto sphereSample = sampler->rejectionSampleUnitSphere();
-                Float3 reflectedDirection = hitRecord.point + hitRecord.normal + sphereSample.normalize();
-                constexpr Float offsetScale = std::numeric_limits<Float>::epsilon();
-                Float3 reflectPosition = hitRecord.point + hitRecord.normal * offsetScale;
-                ray = Ray(reflectPosition, reflectedDirection, std::cos(ray.intensity));
-                return estimateAbsorptionAtRay(hitRecord, ray, depth);
-            }
-            case SPECULAR_REFLECTION: {
-                Float3 reflectedDirection = ray.dir - 2 * (ray.dir.dot(hitRecord.normal) * hitRecord.normal);
-                ray = Ray(hitRecord.point, reflectedDirection, ray.intensity);
-                return estimateAbsorptionAtRay(hitRecord, ray, depth);
-            }
-        }
+std::pair<AbsorptionIndex, Float>
+Estimator::estimateAbsorptionAtRay(HitRecord &hitRecord, Ray &ray, Float &pdf, float &depth) {
+    if (--depth <= 0) {
+        pdf = 0;
+        return std::make_pair(scene->emittingNodeCount(), 0.);
     }
 
     // if we did not hit anything, add the intensity to the enclosure
-    return std::make_pair(scene->emittingNodeCount(), ray.intensity);
+    if (!scene->closestHit(ray, &hitRecord))
+        return std::make_pair(scene->emittingNodeCount(), ray.intensity);
+
+    // TODO: check if hit itself
+    RaySurfaceInteraction rayInteraction = scene->materials[hitRecord.MaterialIndex].interact(sampler->getCanonical());
+    switch (rayInteraction) {
+        case ABSORPTION:
+#ifdef VERBOSE
+            //#pragma omp critical
+            //std::cerr << "emitted from " << ray << " absorbed at " << hitRecord.primitiveIndex << std::endl;
+#endif
+            return std::make_pair(hitRecord.ObjectIndex, ray.intensity);
+        case DIFFUSE_REFLECTION: {
+            // reflect diffusely with the tangent sphere method
+            auto sphereSample = sampler->rejectionSampleUnitSphere();
+            Float3 reflectedDirection = hitRecord.point + hitRecord.normal + sphereSample.normalize();
+            constexpr Float offsetScale = std::numeric_limits<Float>::epsilon();
+            Float3 reflectPosition = hitRecord.point + hitRecord.normal * offsetScale;
+            ray = Ray(reflectPosition, reflectedDirection, std::cos(ray.intensity));
+            return estimateAbsorptionAtRay(hitRecord, ray, pdf, depth);
+        }
+        case SPECULAR_REFLECTION: {
+            Float3 reflectedDirection = ray.dir - 2 * (ray.dir.dot(hitRecord.normal) * hitRecord.normal);
+            ray = Ray(hitRecord.point, reflectedDirection, ray.intensity);
+            return estimateAbsorptionAtRay(hitRecord, ray, pdf, depth);
+        }
+    }
 }

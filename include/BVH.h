@@ -12,13 +12,13 @@
 
 
 enum SplitMethod {
-    MEDIANCUT,
-    MIDPOINT
+    MEDIANCUT = 0,
+    MIDPOINT = 1,
 };
 
 enum AxisMethod {
-    LONGESTAXIS,
-    RANDOMAXIS
+    LONGESTAXIS = 0,
+    RANDOMAXIS = 1,
 };
 
 
@@ -28,7 +28,7 @@ struct LinearBVHNode {
     std::vector<Primitive> primitives;
 
     LinearBVHNode() = default;
-    explicit LinearBVHNode(Aabb bounds);
+    explicit LinearBVHNode(const Aabb& bounds);
 
     bool operator==(const LinearBVHNode &rhs) const;
 
@@ -41,11 +41,13 @@ public:
 
     bool hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const;
 
-    BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t begin, size_t end, unsigned int maxPrimsPerLeaf=50);
+    BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t begin, size_t end);
 
     void linearize(std::vector<LinearBVHNode> &result, size_t index);
 
-    void setSampler(std::shared_ptr<DefaultSampler> &sampler);
+    static void setSampler(std::shared_ptr<DefaultSampler> &sampler);
+    static void setConstructionOptions(unsigned int maxPrimsPerLeaf = 50, SplitMethod splitMethod = MEDIANCUT,
+                                       AxisMethod axisMethod = LONGESTAXIS);
 
     friend std::ostream &operator<<(std::ostream &os, const BVHNode &b);
 
@@ -54,12 +56,13 @@ public:
     size_t numNodes();
 private:
     FRIEND_TEST(Scene, BuildBVH);
+    static AxisMethod axisMethod;
+    static SplitMethod splitMethod;
+    static unsigned int maxPrimsPerLeaf;
     static std::shared_ptr<DefaultSampler> sampler;
     std::shared_ptr<BVHNode> left = nullptr;
     std::shared_ptr<BVHNode> right = nullptr;
     std::vector<Primitive> primitives{};
-    AxisMethod axisMethod = LONGESTAXIS;
-    SplitMethod splitMethod = MEDIANCUT;
 
     void makeLeaf(const std::vector<std::shared_ptr<Primitive>> &prim,  size_t begin, size_t end);
     bool isLeaf() const { return !primitives.empty(); }

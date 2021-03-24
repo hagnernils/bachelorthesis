@@ -2,9 +2,11 @@
 // Created by Nils Hagner on 16.02.21.
 //
 #include "BVH.h"
-#include <utility>
 
 std::shared_ptr<DefaultSampler> BVHNode::sampler;
+AxisMethod BVHNode::axisMethod = AxisMethod::LONGESTAXIS;
+SplitMethod BVHNode::splitMethod = SplitMethod::MEDIANCUT;
+unsigned int BVHNode::maxPrimsPerLeaf = 5;
 
 void BVHNode::setSampler(std::shared_ptr <DefaultSampler> &sampler) { BVHNode::sampler = sampler; }
 
@@ -18,7 +20,7 @@ void BVHNode::linearize(std::vector<LinearBVHNode> &result, size_t index) {
     right->linearize(result, 2 * index + 2);
 }
 
-BVHNode::BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t begin, size_t end, unsigned int maxPrimsPerLeaf) {
+BVHNode::BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t begin, size_t end) {
     auto treeSize = end - begin;
 
     bounds = primitives[begin]->bounds;
@@ -48,7 +50,9 @@ BVHNode::BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t beg
             auto partitioner = [splitAxis, splitValue](std::shared_ptr<Primitive> &p){ return p->bounds.center()[splitAxis] < splitValue; };
             auto partition = std::partition(primitives.begin() + begin, primitives.begin() + end, partitioner);
             secondSetBegin = partition - primitives.begin();
-            if (secondSetBegin != treeSize)  // fallback to median cut if all primitives lie on the same value of the chosen axis
+            // the partition of values with the same value on the split axis can lead to one set being size 0, fall
+            // back to median cut then
+            if (secondSetBegin != begin && secondSetBegin != end)
                 break;
         }
         case MEDIANCUT: {
@@ -58,8 +62,8 @@ BVHNode::BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t beg
             secondSetBegin = begin + treeSize / 2;
         }
     }
-    left = std::make_shared<BVHNode>(primitives, begin, secondSetBegin, maxPrimsPerLeaf);
-    right = std::make_shared<BVHNode>(primitives, secondSetBegin, end, maxPrimsPerLeaf);
+    left = std::make_shared<BVHNode>(primitives, begin, secondSetBegin);
+    right = std::make_shared<BVHNode>(primitives, secondSetBegin, end);
 }
 
 bool BVHNode::hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const {
@@ -106,7 +110,13 @@ size_t BVHNode::numNodes() {
     return (left != nullptr ? left->numNodes() + 1 : 0 ) + (right != nullptr ? right->numNodes() + 1 : 0);
 }
 
-LinearBVHNode::LinearBVHNode(Aabb bounds) : bounds(std::move(bounds)) {}
+void BVHNode::setConstructionOptions(unsigned int maxPrimsPerLeaf, SplitMethod splitMethod, AxisMethod axisMethod) {
+    BVHNode::maxPrimsPerLeaf = maxPrimsPerLeaf;
+    BVHNode::splitMethod = splitMethod;
+    BVHNode::axisMethod = axisMethod;
+}
+
+LinearBVHNode::LinearBVHNode(const Aabb& bounds) : bounds(bounds) {}
 
 bool LinearBVHNode::operator==(const LinearBVHNode &rhs) const {
     return bounds == rhs.bounds &&
