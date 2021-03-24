@@ -90,7 +90,7 @@ void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, c
 
             MeshObject meshObject;
             meshObject.name = mesh.name;
-            meshObject.materialIndex = primitive.material;
+            meshObject.materialIndex = primitive.material == -1 ? 0 : primitive.material;
             meshObject.transform = fullTransform;
 
             auto indicesBufferView = AccessorToBufferView<unsigned char>(scene, primitive.indices, model);
@@ -168,6 +168,9 @@ void Scene::loadGLTF(const std::string &filename) {
 
         materials.push_back(mat);
     }
+
+    if (materials.empty())
+        materials.emplace_back("defaultBB");
 
     // filter out nodes not used as child = root node(s)
     std::vector<bool> isRootNode(model.nodes.size(), true);
