@@ -8,14 +8,31 @@
 #include <cmath>
 #include <random>
 #include <utility>
+#include <memory>
 #include "Float.h"
 #include "Sampler.h"
 
 
-inline Float3 cosineSampleHemisphere(const Point2f diskSample) {
+constexpr Float uniformHemispherePdf() { return 1. / 2 * M_PI; }
+constexpr Float uniformHemisphereInvPdf() { return 2. * M_PI; }
+
+constexpr Float uniformSpherePdf() { return 1. / 4. * M_PI; }
+constexpr Float uniformSphereInvPdf() { return 4 * M_PI; }
+
+inline Float cosineHemispherePdf(Float angleToNormal) { return angleToNormal * M_1_PI; }
+inline Float cosineHemisphereInvPdf(Float angleToNormal) { return angleToNormal < 0 ? 0 : angleToNormal * M_PI; }
+
+inline Float3 cosineSampleHemisphereMalley(const Point2f diskSample) {
     // project a sample on a circle up to the hemisphere
-    Float height = std::sqrt(1 - diskSample.first * diskSample.first - diskSample.second * diskSample.second);
+    Float height = std::sqrt(std::max((Float)0., (Float)1. - diskSample.first * diskSample.first - diskSample.second * diskSample.second));
     return Float3(diskSample.first, diskSample.second, height);
+}
+
+inline Float3 cosineSampleHemisphere(const Point2f p) {
+    Float r = std::sqrt(p.first);
+    Float theta = 2 * M_PI * p.second;
+
+    return Float3(r * std::cos(theta), r * std::sin(theta), std::sqrt(std::max((Float)0., 1. - p.first)));
 }
 
 inline Float3 uniformSampleHemisphere(const Point2f &p) {
@@ -26,8 +43,16 @@ inline Float3 uniformSampleHemisphere(const Point2f &p) {
     return Float3(scale * std::cos(phi), scale * std::sin(phi), z);
 }
 
-inline Float3 uniformSampleHemisphereAtNormal(const Float3 &surfaceNormal, const Point2f &p) {
-    Float3 sample = uniformSampleHemisphere(p);
+inline Float3 uniformSampleSphere(const Point2f &p) {
+    Float z = 1 - 2 * p.first;
+    Float r = std::sqrt(std::max((Float)0., (Float)1. - z * z));
+    Float phi = 2 * M_PI * p.second;
+    return Float3(r * std::cos(phi), r * std::sin(phi), z);
+}
+
+inline Float3 sampleHemisphereAtNormal(const Float3 &surfaceNormal, std::shared_ptr<DefaultSampler> sampler, Float &pdf, bool uniform) {
+    auto sample = uniform ? uniformSampleHemisphere(sampler->get2D()) : cosineSampleHemisphereMalley(sampler->sampleDisk());
+
     // create an orthonormal basis (s|t|n) of current surface point
     // see https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html#orthonormalbases/generatinganorthonormalbasis
     Float3 s, t;
@@ -35,12 +60,14 @@ inline Float3 uniformSampleHemisphereAtNormal(const Float3 &surfaceNormal, const
     t = Float3::cross(surfaceNormal, a);
     t.normalize();
     s = Float3::cross(surfaceNormal, t);
+    s.normalize();
 
-    return sample.x * s + sample.y * t + sample.z * surfaceNormal;
+    sample = sample.x * s + sample.y * t + sample.z * surfaceNormal;
+
+    pdf = uniform ? uniformHemispherePdf() : cosineHemispherePdf(std::abs(sample.dot(surfaceNormal)));
+
+    return sample;
 }
 
-constexpr Float uniformHemispherePdf() { return 2 * M_1_PI; }
-
-inline Float cosineHemispherePdf(Float angleToNormal) { return angleToNormal * M_1_PI; }
 
 #endif //BACHELORTHESIS_DIRECTIONSAMPLING_H
