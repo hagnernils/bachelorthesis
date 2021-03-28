@@ -12,7 +12,7 @@ struct AbsorbedEnergySpectrum {
     size_t count;
 
     explicit AbsorbedEnergySpectrum(size_t count) : count(count) {
-        bins = std::valarray(0.f, count);
+        bins = std::valarray(0., count);
     }
 
     Float operator[](size_t index) const {

@@ -104,7 +104,7 @@ std::ostream &operator<<(std::ostream &stream, Primitive &prim) {
                   << "}" << std::endl;
 }
 
-inline Float3 Primitive::atUV(Float u, Float v) const { return (1 - u - v) * a + u * b + v * c; }
+inline Float3 Primitive::atUV(Float u, Float v) const { return (1. - u - v) * a + u * b + v * c; }
 
 bool Primitive::operator==(const Primitive &rhs) const {
     return parent == rhs.parent &&

@@ -15,10 +15,9 @@ struct Vector {
     T data[n];
 };
 
-typedef float Float;
+typedef double Float;
 
-typedef Vector<Float, 3> Vec3;
-typedef Vector<float, 3> Float3;
+typedef Vector<Float, 3> Float3;
 
 template<typename T>
 struct Vector<T, 3> {
@@ -35,6 +34,7 @@ struct Vector<T, 3> {
     Vector(const Vector<T, 3> &v) : data(v.data) {}
 
     Vector<T, 3>(T x, T y, T z) : data({x,y,z}) {}
+    Vector<T, 3>(T x) : data({x,x,x}) {}
 
     Vector(std::initializer_list<T> list) {
         std::copy(list.begin(), list.end(), data.begin());
@@ -49,7 +49,7 @@ struct Vector<T, 3> {
     }
 
     inline static Vector<T, 3> cross(const Vector<T, 3> &a, const Vector<T, 3> &b) {
-        return Vec3(a.y * b.z - a.z * b.y,
+        return Vector<T, 3>(a.y * b.z - a.z * b.y,
                     a.z * b.x - a.x * b.z,
                     a.x * b.y - a.y * b.x);
     }
