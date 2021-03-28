@@ -190,6 +190,7 @@ bool Scene::closestHit(Ray r, HitRecord *hitRecord) {
     Float tMin = 0;
     Float tMax = 1e16f;
     bool hit = false;
+//#define EXHAUSTIVE_INTERSECTION
 #ifndef EXHAUSTIVE_INTERSECTION
     hit = bvh.hit(r, tMin, tMax, hitRecord);
 #else
@@ -219,7 +220,8 @@ void Scene::buildSceneGeometry() {
 }
 
 void Scene::MeshToGnuPlotMesh(const std::string& filename) {
-    std::fstream outfile("mesh.out", std::ios::out);
+    std::fstream outfileverts("meshVerts.txt", std::ios::out);
+    std::fstream outfileindices("meshIndices.txt", std::ios::out);
     auto len = sceneGeometry.size();
     std::vector<Float> x, y, z;
     std::vector<size_t> tris;
@@ -243,12 +245,12 @@ void Scene::MeshToGnuPlotMesh(const std::string& filename) {
 
     for (auto &vec : {x, y, z}) {
         for (auto val : vec) {
-            outfile << val << sep;
+            outfileverts << val << sep;
         }
-        outfile << std::endl;
+        outfileverts << std::endl;
     }
 
     for (auto i = 0; i < len; i++)
-        outfile << tris[3 * i] << sep << tris[3 * i + 1] << sep << tris[3 * i + 2] << std::endl;
+        outfileindices << tris[3 * i] << sep << tris[3 * i + 1] << sep << tris[3 * i + 2] << std::endl;
 
 }
