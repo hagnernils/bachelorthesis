@@ -41,8 +41,10 @@ public:
     }
 
     inline Point2f sampleDisk() {
-        return rejectionSampleDisk();
+        return polarSampleDisk();
     }
+
+    const Float sampleDiskPdf = 1 / M_2_PI;
 
     inline int uniformInt(int lower, int upper) {
         std::uniform_int_distribution<> distribution(lower, upper);
@@ -65,11 +67,19 @@ private:
         return rejectionSampleDisk();
     }
 
+    inline Point2f polarSampleDisk() {
+        auto u = getCanonical();
+        auto v = getCanonical();
+        Float r = std::sqrt(u);
+        Float theta = 2 * M_PI * v;
+        return Point2f(r * std::cos(theta), r * std::sin(theta));
+    }
+
     inline Float3 randomVector3() {
         return Float3(2 * getCanonical() - 1, 2 * getCanonical() - 1, 2 * getCanonical() - 1);
     }
 };
 
-typedef Sampler<std::mt19937_64, 10> DefaultSampler;
+typedef Sampler<std::mt19937_64, 15> DefaultSampler;
 
 #endif //BACHELORTHESIS_SAMPLER_H
