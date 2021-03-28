@@ -24,15 +24,14 @@ public:
     std::shared_ptr<Scene> scene = nullptr;
 
     unsigned int samplesPerPrimitive = 10000;
+    bool useUniformSampling = true;
     float traceDepth = std::numeric_limits<Float>::infinity();
 
     std::vector<AbsorbedEnergySpectrum> estimateAbsorption();
 
 private:
-    // send one global sample and calculate its absorption
-    std::pair<AbsorptionIndex, Float> estimateAbsorption(Primitive &emittingPrimitive, Float &pdf, bool front=true);
 
-    std::pair<AbsorptionIndex, Float> estimateAbsorptionAtRay(HitRecord &hitRecord, Ray &ray, Float &pdf, float &depth);
+    std::pair<AbsorptionIndex, Float> estimateAbsorptionAtRay(HitRecord &hitRecord, Ray &ray, float &depth);
 };
 
 #endif //BACHELORTHESIS_ESTIMATOR_H
