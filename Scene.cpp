@@ -216,9 +216,6 @@ void Scene::buildSceneGeometry() {
     }
 
     bvh = BVHNode(sceneGeometry, 0, sceneGeometry.size());
-    size_t offset = 0;
-    hitBVH = std::vector<LinearBVHNode>(2 << (bvh.depth() + 1));
-    bvh.linearize(hitBVH, offset);
 }
 
 void Scene::MeshToGnuPlotMesh(const std::string& filename) {

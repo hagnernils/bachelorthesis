@@ -10,16 +10,6 @@ unsigned int BVHNode::maxPrimsPerLeaf = 5;
 
 void BVHNode::setSampler(std::shared_ptr <DefaultSampler> &sampler) { BVHNode::sampler = sampler; }
 
-void BVHNode::linearize(std::vector<LinearBVHNode> &result, size_t index) {
-    result[index] = LinearBVHNode(bounds);
-    if (isLeaf()) {
-        result[index].primitives = primitives;
-        return;
-    }
-    left->linearize(result, 2 * index + 1);
-    right->linearize(result, 2 * index + 2);
-}
-
 BVHNode::BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t begin, size_t end) {
     auto treeSize = end - begin;
 
@@ -114,17 +104,6 @@ void BVHNode::setConstructionOptions(unsigned int maxPrimsPerLeaf, SplitMethod s
     BVHNode::maxPrimsPerLeaf = maxPrimsPerLeaf;
     BVHNode::splitMethod = splitMethod;
     BVHNode::axisMethod = axisMethod;
-}
-
-LinearBVHNode::LinearBVHNode(const Aabb& bounds) : bounds(bounds) {}
-
-bool LinearBVHNode::operator==(const LinearBVHNode &rhs) const {
-    return bounds == rhs.bounds &&
-           primitives == rhs.primitives;
-}
-
-bool LinearBVHNode::operator!=(const LinearBVHNode &rhs) const {
-    return !(rhs == *this);
 }
 
 /*

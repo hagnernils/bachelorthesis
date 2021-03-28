@@ -50,7 +50,6 @@ public:
 private:
     FRIEND_TEST(Scene, BuildBVH);
     std::vector<std::shared_ptr<Primitive>> sceneGeometry;
-    std::vector<LinearBVHNode> hitBVH;
     BVHNode bvh;
 };
 

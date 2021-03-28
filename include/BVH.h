@@ -21,20 +21,6 @@ enum AxisMethod {
     RANDOMAXIS = 1,
 };
 
-
-//template<size_t numChildren>
-struct LinearBVHNode {
-    Aabb bounds{};
-    std::vector<Primitive> primitives;
-
-    LinearBVHNode() = default;
-    explicit LinearBVHNode(const Aabb& bounds);
-
-    bool operator==(const LinearBVHNode &rhs) const;
-
-    bool operator!=(const LinearBVHNode &rhs) const;
-};
-
 class BVHNode {
 public:
     BVHNode() = default;
@@ -42,8 +28,6 @@ public:
     bool hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const;
 
     BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t begin, size_t end);
-
-    void linearize(std::vector<LinearBVHNode> &result, size_t index);
 
     static void setSampler(std::shared_ptr<DefaultSampler> &sampler);
     static void setConstructionOptions(unsigned int maxPrimsPerLeaf = 50, SplitMethod splitMethod = MEDIANCUT,
