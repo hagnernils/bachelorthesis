@@ -31,6 +31,9 @@ public:
         bounds.max.x = std::max({a.x, b.x, c.x});
         bounds.max.y = std::max({a.y, b.y, c.y});
         bounds.max.z = std::max({a.z, b.z, c.z});
+        Float bbPadding = 0.000001;
+        bounds.min -= Float3(bbPadding);
+        bounds.max += Float3(bbPadding);
     };
 
     Primitive(const Float3& a, const Float3& b, const Float3& c, MeshObject *parent)
