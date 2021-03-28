@@ -25,7 +25,6 @@ std::vector<AbsorbedEnergySpectrum> Estimator::estimateAbsorption() {
             int N = samplesPerPrimitive, M = 1;
             auto normal = prim->normal;
             constexpr Float offsetScale = 10 * std::numeric_limits<Float>::epsilon();
-            bool sampleUniform = true;
             for (int areaSamples = 0; areaSamples < N; areaSamples++) {
 
                 Float3 primitiveSample = prim->sampleArea(sampler->get2D());
@@ -36,19 +35,19 @@ std::vector<AbsorbedEnergySpectrum> Estimator::estimateAbsorption() {
                     Float pdf;
                     Float3 directionSample = sampleHemisphereAtNormal(normal, sampler, pdf, useUniformSampling);
                     // the fraction of the emissive power at this point(directional emissive power represented by this ray) is cos theta
-                    Float cosTheta = directionSample.dot(normal);
-                    Float intensity = useUniformSampling ? 1. / (N * M) : (cosTheta / M_PI) / (N * M * pdf);
-                    Ray ray(primitiveSample, directionSample, intensity);
+                    Float cosTheta = std::abs(directionSample.dot(normal));
+                    Float intensity = useUniformSampling ? 1. : (cosTheta / M_PI) / pdf;
+                    Ray ray(primitiveSample, directionSample, 1.);
                     HitRecord hitRecord{};
 
                     auto depth = traceDepth;
                     auto estimate = estimateAbsorptionAtRay(hitRecord, ray, depth);
-                    primitiveSpectrum[estimate.first] = primitiveSpectrum[estimate.first] + estimate.second;
+                    primitiveSpectrum[estimate.first] += estimate.second;
                 }
             }
             // we assume even emittance over mesh, so scale emitted intensity of primitive with its percentage of the whole
             // node area
-            //primitiveSpectrum.normalize();
+            primitiveSpectrum /= (N * M);
             nodeSpectrum += primitiveSpectrum * (prim->Area() / nodeSurfaceArea);
         }
 
