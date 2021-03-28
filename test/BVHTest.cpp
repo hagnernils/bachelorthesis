@@ -33,9 +33,4 @@ TEST(BVH, BvhConstruction) {
     ss << bvh;
     std::cerr << ss.str();
     ASSERT_EQ(ss.str(), "BVHNode {BVHNode {Leaf (1) Leaf (1) }BVHNode {Leaf (1) Leaf (1) }}");
-
-    std::vector<LinearBVHNode> linearBvh(2 << (bvh.depth() + 1));
-    bvh.linearize(linearBvh, 0);
-
-    ASSERT_EQ(linearBvh[0], LinearBVHNode(Aabb{{0,0,0}, {2,3,0}}));
 }
