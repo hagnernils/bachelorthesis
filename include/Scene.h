@@ -37,6 +37,8 @@ public:
 
     size_t absorbingNodeCount() const { return objects.size() + 1; }
 
+    size_t numPrimitives() const { return sceneGeometry.size(); }
+
     void loadGLTF(const std::string &filename);
 
     void MeshToGnuPlotMesh(const std::string& filename="mesh.out.txt");

@@ -4,24 +4,15 @@
 #include "Scene.h"
 
 int main(int argc, char* argv[]) {
-    if (argc == 0)
+    if (argc < 7)
         return 1;
-    auto sceneNames = std::vector<std::string>{
-            //"triangle",
-            //"triangles",
-            //"cube",
-            //"planeInSphere",
-            //"spheres_lowres",
-            //"spheres_midres",
-            //"spheres_highres",
-            //"ERNST2019"
-            //"ERNST_WITH_MATERIALS"
-    };
     auto primsPerLeaf = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 5;
     auto samplesPerTriangle = std::strtol(argv[2], nullptr, 10);
     auto traceDepth = std::strtol(argv[3], nullptr, 10);
     bool useMedianSplit = std::strtol(argv[4], nullptr, 10);
-    auto sceneName = std::string(argv[5]);
+    bool useUniformSampling = std::strtol(argv[5], nullptr, 10);
+    auto sceneName = std::string(argv[6]);
+    auto outFileName = argc > 7 ? std::string(argv[7]) : "";
 
     auto scene = std::make_shared<Scene>();
     scene->loadGLTF(sceneName + ".gltf");
@@ -30,44 +21,50 @@ int main(int argc, char* argv[]) {
     if (!scene->materials.empty()) {
         scene->materials = {
             Material("DefaultBB"),
-            Material("partSpec", 0.7, 0.3),
-            Material("defaultSpec", 0.5, 0.5, 0),
+            Material("partSpec", 0.2, 0, 0.8),
         };
     }
-    for (auto &obj : scene->objects)
-        obj.materialIndex = 0;
+    scene->objects[0].materialIndex = 0;
+    scene->objects[1].materialIndex = 0;
     scene->sampler->seed(12345);
 
     BVHNode::setConstructionOptions(primsPerLeaf, useMedianSplit ? SplitMethod::MEDIANCUT : SplitMethod::MIDPOINT);
     scene->buildSceneGeometry();
 
-    //scene->MeshToGnuPlotMesh();
+    scene->MeshToGnuPlotMesh();
 
     Estimator estimator(scene);
     estimator.samplesPerPrimitive = samplesPerTriangle;
     estimator.traceDepth = traceDepth;
+    estimator.useUniformSampling = useUniformSampling;
 
-    auto result1 = estimator.estimateAbsorption();
+    auto result = estimator.estimateAbsorption();
     std::stringstream stream;
-    stream.width(20);
     stream.flags(std::ios::left);
 
 
-    stream << "result" << std::endl;
+    stream << "result for " << sceneName << " with rays" << std::endl;
+    stream << scene->numPrimitives() * samplesPerTriangle << std::endl;
     // header line
-    stream << std::setw(20) << "Emitting Mesh";
+    auto width = 20;
+    stream.width(width);
+    stream << std::setw(width) << "Emitting Mesh";
     for (auto &o: scene->objects)
-        stream << std::setw(20) << o.name;
-    stream << std::setw(20) << "Enclosure" << std::endl;
+        stream << std::setw(width) << o.name;
+    stream << std::setw(width) << "Enclosure" << std::endl;
 
     // one row for each mesh
     for (int i = 0; i < scene->emittingNodeCount(); i++) {
-        stream << std::setw(20) << scene->objects[i].name;
-        for (int j = 0; j < scene->absorbingNodeCount(); j++)
-            stream << std::setw(20) << result1[i][j];
+        stream << std::setw(width) << scene->objects[i].name;
+        for (int j = 0; j < scene->absorbingNodeCount(); j++) {
+            stream << std::setw(width) << std::setprecision(std::numeric_limits<Float>::max_digits10) << result[i][j];
+        }
         stream << std::endl;
     }
-    std::cerr << stream.str();
-    std::ofstream outFileStream("output.txt");
-    outFileStream << stream.str();
+    std::cout << stream.str();
+    if (!outFileName.empty()) {
+        std::ofstream outFileStream(outFileName, std::ios::app | std::ios::out);
+        outFileStream << stream.str();
+    }
+
 }
