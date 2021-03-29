@@ -41,7 +41,8 @@ public:
 
     void loadGLTF(const std::string &filename);
 
-    void MeshToGnuPlotMesh(const std::string& filename="mesh.out.txt");
+    void MeshToGnuPlotMesh(const std::vector<AbsorbedEnergySpectrum> &result);
+    void OutputColoredMesh(const std::vector<AbsorbedEnergySpectrum> &result);
 
     // prepare the scene so rays can be traced.
     void buildSceneGeometry();

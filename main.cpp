@@ -31,7 +31,6 @@ int main(int argc, char* argv[]) {
     BVHNode::setConstructionOptions(primsPerLeaf, useMedianSplit ? SplitMethod::MEDIANCUT : SplitMethod::MIDPOINT);
     scene->buildSceneGeometry();
 
-    scene->MeshToGnuPlotMesh();
 
     Estimator estimator(scene);
     estimator.samplesPerPrimitive = samplesPerTriangle;
@@ -65,6 +64,7 @@ int main(int argc, char* argv[]) {
     if (!outFileName.empty()) {
         std::ofstream outFileStream(outFileName, std::ios::app | std::ios::out);
         outFileStream << stream.str();
+        scene->MeshToGnuPlotMesh(result);
     }
 
 }

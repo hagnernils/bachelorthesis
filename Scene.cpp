@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <MeshObject.h>
+#include <Spectrum.h>
 #include "tinygltf/tiny_gltf.h"
 #include "Scene.h"
 #include "Material.h"
@@ -219,38 +220,56 @@ void Scene::buildSceneGeometry() {
     bvh = BVHNode(sceneGeometry, 0, sceneGeometry.size());
 }
 
-void Scene::MeshToGnuPlotMesh(const std::string& filename) {
+
+void Scene::OutputColoredMesh(const std::vector<AbsorbedEnergySpectrum> &result) {
+    std::fstream outfile("meshData.txt", std::ios::out);
+    // calculate global view factor = sum of columns
+    std::vector<double> globalVfs(result.size(), 0.);
+    for (auto &absorbedEnergySpectrum : result) {
+        for (int i = 0; i < absorbedEnergySpectrum.count - 1; i++)
+            globalVfs[i] += absorbedEnergySpectrum[i];
+    }
+
+    for (int i = 0; i < primsOfObject.size(); i++) {
+        auto color = globalVfs[i];
+        for (auto &prim : primsOfObject[i]) {
+            outfile << prim->a.toString() << " " << color << std::endl
+                << prim->b.toString() << " " <<  color << std::endl
+                << prim->c.toString() << " " <<  color << std::endl;
+        }
+    }
+    outfile.close();
+}
+
+
+void Scene::MeshToGnuPlotMesh(const std::vector<AbsorbedEnergySpectrum> &result) {
     std::fstream outfileverts("meshVerts.txt", std::ios::out);
     std::fstream outfileindices("meshIndices.txt", std::ios::out);
+
+    // calculate global view factor = sum of columns
+    std::vector<double> globalVfs(result.size(), 0.);
+    for (auto &absorbedEnergySpectrum : result) {
+        for (int i = 0; i < absorbedEnergySpectrum.count - 1; i++)
+            globalVfs[i] += absorbedEnergySpectrum[i];
+    }
+
     auto len = sceneGeometry.size();
     std::vector<Float> x, y, z;
     std::vector<size_t> tris;
     for (const auto& p: sceneGeometry) {
-        x.push_back(p->a.x);
-        y.push_back(p->a.y);
-        z.push_back(p->a.z);
-
-        x.push_back(p->b.x);
-        y.push_back(p->b.y);
-        z.push_back(p->b.z);
-
-        x.push_back(p->c.x);
-        y.push_back(p->c.y);
-        z.push_back(p->c.z);
-
+        auto color = globalVfs[p->parent->objectID];
+        outfileverts << p->a.toString() << " " << color << std::endl
+                << p->b.toString() << " " <<  color << std::endl
+                << p->c.toString() << " " <<  color << std::endl;
         size_t vI = tris.size();
         tris.insert(tris.end(), {vI, vI + 1, vI + 2});
     }
-    auto sep = ", ";
+    auto sep = " ";
 
-    for (auto &vec : {x, y, z}) {
-        for (auto val : vec) {
-            outfileverts << val << sep;
-        }
-        outfileverts << std::endl;
+    for (auto i = 0; i < len; i++) {
+        outfileindices << tris[3 * i] << sep << tris[3 * i + 1] << sep << tris[3 * i + 2] << std::endl;
+
     }
 
-    for (auto i = 0; i < len; i++)
-        outfileindices << tris[3 * i] << sep << tris[3 * i + 1] << sep << tris[3 * i + 2] << std::endl;
 
 }
