@@ -17,17 +17,6 @@ int main(int argc, char* argv[]) {
     auto scene = std::make_shared<Scene>();
     scene->loadGLTF(sceneName + ".gltf");
 
-    // add a default BB material if none was given
-    if (!scene->materials.empty()) {
-        scene->materials = {
-            Material("DefaultBB"),
-            Material("partSpec", 0.5, 0.5),
-        };
-    }
-    //for (auto &obj : scene->objects)
-    //    obj.materialIndex = 0;
-
-    //scene->objects[0].materialIndex = 1;
     scene->sampler->seed(12345);
 
     BVHNode::setConstructionOptions(primsPerLeaf, useMedianSplit ? SplitMethod::MEDIANCUT : SplitMethod::MIDPOINT);
@@ -66,6 +55,7 @@ int main(int argc, char* argv[]) {
     if (!outFileName.empty()) {
         std::ofstream outFileStream(outFileName, std::ios::app | std::ios::out);
         outFileStream << stream.str();
+        // uncomment to write mesh visualization output, might be a large file
         //scene->MeshToGnuPlotMesh(result);
     }
 

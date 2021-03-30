@@ -27,6 +27,7 @@ public:
 
     bool hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const;
 
+    // recursive BVH building
     BVHNode(std::vector<std::shared_ptr<Primitive>> &primitives, size_t begin, size_t end);
 
     static void setSampler(std::shared_ptr<DefaultSampler> &sampler);

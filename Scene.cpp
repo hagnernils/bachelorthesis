@@ -30,10 +30,6 @@ BufferView<T> AccessorToBufferView(Scene &scene, const int accessorIndex, const 
                              + accessor.byteOffset);
     bufferView.numElements = accessor.count;
     bufferView.byteStride = gltfBufferView.byteStride ? gltfBufferView.byteStride : sizeof(T);
-    bufferView.elementSizeInBytes = accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT ? 2 :
-                                    accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT ? 4 :
-                                    accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT ? 4 :
-                                    sizeof(T);
     return bufferView;
 }
 
@@ -213,28 +209,6 @@ void Scene::buildSceneGeometry() {
     bvh = BVHNode(sceneGeometry, 0, sceneGeometry.size());
 }
 
-
-void Scene::OutputColoredMesh(const std::vector<AbsorbedEnergySpectrum> &result) {
-    std::fstream outfile("meshData.txt", std::ios::out);
-    // calculate global view factor = sum of columns
-    std::vector<double> globalVfs(result.size(), 0.);
-    for (auto &absorbedEnergySpectrum : result) {
-        for (int i = 0; i < absorbedEnergySpectrum.count - 1; i++)
-            globalVfs[i] += absorbedEnergySpectrum[i];
-    }
-
-    for (int i = 0; i < primsOfObject.size(); i++) {
-        auto color = globalVfs[i];
-        for (auto &prim : primsOfObject[i]) {
-            outfile << prim->a.toString() << " " << color << std::endl
-                << prim->b.toString() << " " <<  color << std::endl
-                << prim->c.toString() << " " <<  color << std::endl;
-        }
-    }
-    outfile.close();
-}
-
-
 void Scene::MeshToGnuPlotMesh(const std::vector<AbsorbedEnergySpectrum> &result) {
     std::fstream outfileverts("meshVerts.txt", std::ios::out);
     std::fstream outfileindices("meshIndices.txt", std::ios::out);
@@ -251,6 +225,7 @@ void Scene::MeshToGnuPlotMesh(const std::vector<AbsorbedEnergySpectrum> &result)
     auto sep = " ";
     size_t counter = 0;
     for (auto &p : sceneGeometry) {
+        // TODO: this excludes 2 sides from the ERNST_truescale model. comment out if needed
         if (p->parent->name.rfind("Side_X-") == 0 || p->parent->name.rfind("Side_Y-") == 0)
             continue;
         if (std::find(excludeObjectIds.begin(), excludeObjectIds.end(), p->parent->objectID) != excludeObjectIds.end())

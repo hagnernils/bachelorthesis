@@ -16,7 +16,6 @@ struct Buffer {
 
     Buffer(std::string name, const std::vector<T> &data) : name(std::move(name)), data(data) {}
 };
-typedef Buffer<u_char> ByteBuffer;
 
 template<typename T>
 struct BufferView {
@@ -25,7 +24,6 @@ struct BufferView {
     uint32_t byteLength = 0;
     uint16_t byteStride = 0;
     size_t numElements = 0;
-    size_t elementSizeInBytes = 0;
 
     BufferView();
 

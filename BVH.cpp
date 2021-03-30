@@ -105,30 +105,3 @@ void BVHNode::setConstructionOptions(unsigned int maxPrimsPerLeaf, SplitMethod s
     BVHNode::splitMethod = splitMethod;
     BVHNode::axisMethod = axisMethod;
 }
-
-/*
-// because the nodes are used in a min-heap, but C++ provides a max-heap, we return the opposite
-bool operator<(const Node &other) const {
-    return estimatedDistance > other.estimatedDistance;
-}
-
-// Kay and Kajiyas heap-based algorithm from rendering of complex scemes
-bool hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) {
-    // the min heap storing all current candidates
-    std::vector<BVHNode> heap = {root};
-
-    while (!heap.empty()) {
-        // get closest candidate box
-        std::pop_heap(heap.begin(), heap.end());
-        auto candidate = heap.back();
-        if (candidate.isLeaf())
-            return candidate.primitive->hit(ray, tMin, tMax, hitRecord);
-        for (const auto& child : candidate.children) {
-            if (child.bounds.hit(ray, tMin, tMax, hitRecord)) {
-                heap.push_back(child);
-                std::push_heap(heap.begin(), heap.end());
-            }
-        }
-    }
-}
-*/

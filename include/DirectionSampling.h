@@ -22,12 +22,14 @@ constexpr Float uniformSphereInvPdf() { return 4 * M_PI; }
 inline Float cosineHemispherePdf(Float angleToNormal) { return angleToNormal * M_1_PI; }
 inline Float cosineHemisphereInvPdf(Float angleToNormal) { return angleToNormal < 0 ? 0 : angleToNormal * M_PI; }
 
+// Malleys Method to project a disk ssample up into the hemisphere
 inline Float3 cosineSampleHemisphereMalley(const Point2f diskSample) {
     // project a sample on a circle up to the hemisphere
     Float height = std::sqrt(std::max((Float)0., (Float)1. - diskSample.first * diskSample.first - diskSample.second * diskSample.second));
     return Float3(diskSample.first, diskSample.second, height);
 }
 
+// short version of Malleys method
 inline Float3 cosineSampleHemisphere(const Point2f p) {
     Float r = std::sqrt(p.first);
     Float theta = 2 * M_PI * p.second;
@@ -43,13 +45,7 @@ inline Float3 uniformSampleHemisphere(const Point2f &p) {
     return Float3(scale * std::cos(phi), scale * std::sin(phi), z);
 }
 
-inline Float3 uniformSampleSphere(const Point2f &p) {
-    Float z = 1 - 2 * p.first;
-    Float r = std::sqrt(std::max((Float)0., (Float)1. - z * z));
-    Float phi = 2 * M_PI * p.second;
-    return Float3(r * std::cos(phi), r * std::sin(phi), z);
-}
-
+// creating and rotating a hemisphere sample, returning the associated PDF. Technique for rotation by Peter Shirley
 inline Float3 sampleHemisphereAtNormal(const Float3 &surfaceNormal, std::shared_ptr<DefaultSampler> sampler, Float &pdf, bool uniform) {
     auto sample = uniform ? uniformSampleHemisphere(sampler->get2D()) : cosineSampleHemisphereMalley(sampler->sampleDisk());
 

@@ -44,8 +44,6 @@ public:
         return polarSampleDisk();
     }
 
-    const Float sampleDiskPdf = 1 / M_2_PI;
-
     inline int uniformInt(int lower, int upper) {
         std::uniform_int_distribution<> distribution(lower, upper);
         return distribution(generator);
