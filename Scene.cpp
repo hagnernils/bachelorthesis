@@ -154,13 +154,13 @@ void Scene::loadGLTF(const std::string &filename) {
         if (base_color_it != material.values.end()) {
             const tinygltf::ColorValue c = base_color_it->second.ColorFactor();
             materials.emplace_back(material.name, c[0], c[1], c[2]);
-        } else {
-            std::cerr << "Using default black body material" << std::endl;
         }
     }
 
-    if (materials.empty())
+    if (materials.empty()) {
+        std::cerr << "No materials in GTLF file, using default black body material" << std::endl;
         materials.emplace_back("defaultBB");
+    }
 
     // filter out nodes not used as child = root node(s)
     std::vector<bool> isRootNode(model.nodes.size(), true);

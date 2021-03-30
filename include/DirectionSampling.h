@@ -1,5 +1,6 @@
 //
 // Created by Nils Hagner on 25.12.20.
+// Most of this code is applied from "Physically Based Rendering"  by Matt Pharr, Wenzel Jakob, and Greg Humphreys, Morgan Kaufmann, third ed., 2016.
 //
 
 #ifndef BACHELORTHESIS_DIRECTIONSAMPLING_H
