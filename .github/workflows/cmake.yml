@@ -41,7 +41,7 @@ jobs:
     - name: Prepare Test
       working-directory: ${{runner.workspace}}
       shell: bash
-      run: mkdir -p build/test && cp bachelorthesis/test/triangle.gltf build/test
+      run: mkdir -p build/test && cp bachelorthesis/test/*.gltf build/test
 
 
     - name: Test
