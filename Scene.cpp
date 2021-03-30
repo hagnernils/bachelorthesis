@@ -39,12 +39,12 @@ BufferView<T> AccessorToBufferView(Scene &scene, const int accessorIndex, const 
 
 
 void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, const Matrix4x4 &parentTransform) {
-    std::cerr << "Parent transform is " << parentTransform;
-
     auto node = model.nodes[nodeIndex];
 
+#ifdef VERBOSE
+    std::cerr << "Parent transform is " << parentTransform;
     std::cerr << "node " << node.name << " with index " << nodeIndex << std::endl;
-
+#endif
     Matrix4x4 translation, rotation, scale;
 
 
@@ -77,15 +77,19 @@ void processNode(Scene &scene, size_t nodeIndex, const tinygltf::Model &model, c
 
     Matrix4x4 fullTransform = parentTransform * matrix * translation * rotation * scale;
 
+#ifdef VERBOSE
     std::cerr << "Full transform is " << fullTransform;
+#endif
 
     // get indices, positions and normals of the mesh
     if (node.mesh != -1) {
         auto &mesh = model.meshes[node.mesh];
-        std::cerr << "Mesh with name " << mesh.name << std::endl;
+        if (mesh.primitives.size() > 1)
+            std::cerr << "Warning: Mesh with name " << mesh.name << " has " << mesh.primitives.size() << " primitives" << std::endl;
         for (auto &primitive : mesh.primitives) {
+#ifdef VERBOSE
             std::cerr << "has indices accessor " << primitive.indices << std::endl << std::endl;
-
+#endif
             if (primitive.mode != TINYGLTF_MODE_TRIANGLES)
                 continue;
 
@@ -148,26 +152,15 @@ void Scene::loadGLTF(const std::string &filename) {
     // Add materials
     for (const auto &material : model.materials) {
         std::cerr << "Found Material : " << material.name << std::endl;
-        Material mat = Material(material.name);
 
         // the four-component base color factor is used for the material values
         const auto base_color_it = material.values.find("baseColorFactor");
         if (base_color_it != material.values.end()) {
             const tinygltf::ColorValue c = base_color_it->second.ColorFactor();
-            mat.absorption = c[0];
-            mat.specularReflection = c[1];
-            mat.diffuseReflection = c[2];
+            materials.emplace_back(material.name, c[0], c[1], c[2]);
         } else {
             std::cerr << "Using default black body material" << std::endl;
         }
-
-        std::cerr << "Material " << mat.name << ":" << std::endl
-                  << "Absorption " << mat.absorption
-                  << " Specular Reflection " << mat.specularReflection
-                  << " Diffuse Reflection " << mat.diffuseReflection
-                  << std::endl;
-
-        materials.push_back(mat);
     }
 
     if (materials.empty())
@@ -188,10 +181,10 @@ void Scene::loadGLTF(const std::string &filename) {
 }
 
 bool Scene::closestHit(Ray r, HitRecord *hitRecord) {
-    Float tMin = 0;
+    Float tMin = 0.001;
     Float tMax = 1e16f;
     bool hit = false;
-//#define EXHAUSTIVE_INTERSECTION
+#define EXHAUSTIVE_INTERSECTION
 #ifndef EXHAUSTIVE_INTERSECTION
     hit = bvh.hit(r, tMin, tMax, hitRecord);
 #else
@@ -253,23 +246,21 @@ void Scene::MeshToGnuPlotMesh(const std::vector<AbsorbedEnergySpectrum> &result)
             globalVfs[i] += absorbedEnergySpectrum[i];
     }
 
-    auto len = sceneGeometry.size();
-    std::vector<Float> x, y, z;
-    std::vector<size_t> tris;
-    for (const auto& p: sceneGeometry) {
+    std::vector<int> excludeObjectIds = { };
+
+    auto sep = " ";
+    size_t counter = 0;
+    for (auto &p : sceneGeometry) {
+        if (p->parent->name.rfind("Side_X-") == 0 || p->parent->name.rfind("Side_Y-") == 0)
+            continue;
+        if (std::find(excludeObjectIds.begin(), excludeObjectIds.end(), p->parent->objectID) != excludeObjectIds.end())
+            continue;
         auto color = globalVfs[p->parent->objectID];
         outfileverts << p->a.toString() << " " << color << std::endl
-                << p->b.toString() << " " <<  color << std::endl
-                << p->c.toString() << " " <<  color << std::endl;
-        size_t vI = tris.size();
-        tris.insert(tris.end(), {vI, vI + 1, vI + 2});
+                     << p->b.toString() << " " << color << std::endl
+                     << p->c.toString() << " " << color << std::endl;
+
+        outfileindices << ++counter << sep << ++counter << sep << ++counter << std::endl;
     }
-    auto sep = " ";
-
-    for (auto i = 0; i < len; i++) {
-        outfileindices << tris[3 * i] << sep << tris[3 * i + 1] << sep << tris[3 * i + 2] << std::endl;
-
-    }
-
 
 }

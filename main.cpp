@@ -21,11 +21,13 @@ int main(int argc, char* argv[]) {
     if (!scene->materials.empty()) {
         scene->materials = {
             Material("DefaultBB"),
-            Material("partSpec", 0.2, 0, 0.8),
+            Material("partSpec", 0.5, 0.5),
         };
     }
-    scene->objects[0].materialIndex = 0;
-    scene->objects[1].materialIndex = 0;
+    //for (auto &obj : scene->objects)
+    //    obj.materialIndex = 0;
+
+    //scene->objects[0].materialIndex = 1;
     scene->sampler->seed(12345);
 
     BVHNode::setConstructionOptions(primsPerLeaf, useMedianSplit ? SplitMethod::MEDIANCUT : SplitMethod::MIDPOINT);
@@ -43,9 +45,9 @@ int main(int argc, char* argv[]) {
 
 
     stream << "result for " << sceneName << " with rays" << std::endl;
-    stream << scene->numPrimitives() * samplesPerTriangle << std::endl;
+    stream << samplesPerTriangle << std::endl;
     // header line
-    auto width = 20;
+    auto width = 25;
     stream.width(width);
     stream << std::setw(width) << "Emitting Mesh";
     for (auto &o: scene->objects)
@@ -64,7 +66,7 @@ int main(int argc, char* argv[]) {
     if (!outFileName.empty()) {
         std::ofstream outFileStream(outFileName, std::ios::app | std::ios::out);
         outFileStream << stream.str();
-        scene->MeshToGnuPlotMesh(result);
+        //scene->MeshToGnuPlotMesh(result);
     }
 
 }

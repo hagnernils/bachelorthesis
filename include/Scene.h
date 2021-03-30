@@ -21,7 +21,7 @@
 class Scene {
 public:
     std::vector<MeshObject> objects;
-    std::vector<Material> materials = { Material{"default", 1,0,0}};
+    std::vector<Material> materials = { };
     std::vector<Buffer<u_char>> buffers;
     std::shared_ptr<DefaultSampler> sampler = std::make_shared<DefaultSampler>();
     std::vector<std::vector<std::shared_ptr<Primitive>>> primsOfObject;
@@ -29,7 +29,7 @@ public:
 
     Scene() {
         sampler->seed(12345);
-        bvh.setSampler(sampler);
+        BVHNode::setSampler(sampler);
     }
 
     // Node count, exclusive the Miss / Environment / Enclosure

@@ -17,33 +17,42 @@ std::vector<AbsorbedEnergySpectrum> Estimator::estimateAbsorption() {
         for (auto &p : prims)
             nodeSurfaceArea += p->Area();
 
-        //std::cerr << "primitive " << scene->objects[i].name << " with Area " << nodeSurfaceArea << std::endl;
+        std::cerr << "primitive " << scene->objects[i].name << " with Area " << nodeSurfaceArea << std::endl;
 
-        #pragma omp parallel for default(none) shared(prims, nodeCount, nodeSurfaceArea, nodeSpectrum, std::cout)
+        #pragma omp parallel for default(none) shared(prims, nodeCount, nodeSurfaceArea, nodeSpectrum, i, std::cerr)
         for (auto &prim : prims) {
             auto primitiveSpectrum = AbsorbedEnergySpectrum(nodeCount + 1);
             int N = samplesPerPrimitive, M = 1;
             auto normal = prim->normal;
-            constexpr Float offsetScale = 10 * std::numeric_limits<Float>::epsilon();
+            constexpr Float offsetScale = std::numeric_limits<Float>::epsilon();
             for (int areaSamples = 0; areaSamples < N; areaSamples++) {
 
                 Float3 primitiveSample = prim->sampleArea(sampler->get2D());
                 // offset the surface sample into direction of the normal to avoid self intersection
                 primitiveSample += normal * offsetScale;
 
-                for (int directionSamples = 0; directionSamples < M; directionSamples++) {
-                    Float pdf;
-                    Float3 directionSample = sampleHemisphereAtNormal(normal, sampler, pdf, useUniformSampling);
-                    // the fraction of the emissive power at this point(directional emissive power represented by this ray) is cos theta
-                    Float cosTheta = std::abs(directionSample.dot(normal));
-                    Float intensity = useUniformSampling ? 1. : (cosTheta / M_PI) / pdf;
-                    Ray ray(primitiveSample, directionSample, 1.);
-                    HitRecord hitRecord{};
+                const bool enableDoubleSidedEmission = false; // The reference for ERNST uses doublesided emission
 
-                    auto depth = traceDepth;
-                    auto estimate = estimateAbsorptionAtRay(hitRecord, ray, depth);
-                    primitiveSpectrum[estimate.first] += estimate.second;
-                }
+                for (int flipNormal = 0; flipNormal < (enableDoubleSidedEmission ? 2 : 1) ; flipNormal++)
+                    for (int directionSamples = 0; directionSamples < M; directionSamples++) {
+                        Float pdf;
+                        Float3 directionSample = sampleHemisphereAtNormal(flipNormal ? -normal : normal, sampler, pdf, useUniformSampling);
+                        // TODO:
+                        // the fraction of the emissive power at this point(directional emissive power represented by this ray) is cos theta
+                        Float cosTheta = std::abs(directionSample.dot(normal));
+                        Float intensity = useUniformSampling ? 1. : (cosTheta / M_PI) / pdf;
+                        Ray ray(primitiveSample, directionSample, 1.); // because we emit diffusely, the intensity is uniform
+                        HitRecord hitRecord{};
+
+                        auto depth = traceDepth;
+                        auto estimate = estimateAbsorptionAtRay(hitRecord, ray, depth);
+                        primitiveSpectrum[estimate.first] += estimate.second;
+                        if (estimate.first == i) {
+                            if (hitRecord.time < 0.00001)
+                                std::cerr << "self intersection with low hit time " << hitRecord.time
+                                            << " for obj " << prim->parent->objectID << std::endl;
+                        }
+                    }
             }
             // we assume even emittance over mesh, so scale emitted intensity of primitive with its percentage of the whole
             // node area
@@ -51,7 +60,7 @@ std::vector<AbsorbedEnergySpectrum> Estimator::estimateAbsorption() {
             nodeSpectrum += primitiveSpectrum * (prim->Area() / nodeSurfaceArea);
         }
 
-        result[i] = nodeSpectrum;
+        result[i] = nodeSpectrum.normalize();
     }
 
     return result;
