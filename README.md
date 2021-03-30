@@ -9,7 +9,7 @@ Using C++, CMake, and other cool stuff.
 - [tinygltf](https://github.com/syoyo/tinygltf)
 
 
-### algorithms implemente
+### algorithms implemented
 - Müller-Trumbore triangle intersection (Primitive.cpp)
 - A BVH using a top-down median or midpoint split (BVH.cpp)
 - cosine weighted and uniform hemisphere sampling (DirectionSampling.h)
@@ -17,3 +17,14 @@ Using C++, CMake, and other cool stuff.
 - own vector and matrix library (Float.h, Matrix.h, Matrix.cpp)
 - AABBs and their intersection (Aabb.h)
 - A MC estimator for REFs (Estimator.cpp)
+
+### program arguments
+The positional arguments for the executable are read in main.cpp and include
+
+- maximum number of primitves per leaf (lower faster)
+- surface samples per triangle. Direction samples are set to 1.
+- maximum trace depth
+- useMedianSplit: whether to use the median (true) or midpoint (false) split
+- useUniformSampling: to use uniform or cosine-weighted hemisphere sampling
+- sceneName: the filename of the gltf file without ending
+- outfilename (optional): where to write the result to. Output is also given on the command line.
