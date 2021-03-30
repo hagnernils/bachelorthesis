@@ -18,6 +18,8 @@ struct Aabb {
     Aabb(const Float minX, const Float minY, const Float minZ,
          const Float maxX, const Float maxY, const Float maxZ) : min({minX, minY, minZ}), max({maxX, maxY, maxZ}) {}
 
+    // Implementation of Algorithm 5, by Peter Shirley.
+    // See https://raytracing.github.io/books/RayTracingTheNextWeek.html#boundingvolumehierarchies/anoptimizedaabbhitmethod
     bool hit(const Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const {
         // TODO: this could be factored out
         Float inverseDirection[3] = {static_cast<Float>(1. / ray.dir.x), static_cast<Float>(1. / ray.dir.y), static_cast<Float>(1. / ray.dir.z)};

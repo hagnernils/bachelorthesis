@@ -5,6 +5,7 @@
 #include <iostream>
 #include "Estimator.h"
 //#define VERBOSE
+
 std::vector<AbsorbedEnergySpectrum> Estimator::estimateAbsorption() {
     const auto nodeCount = scene->emittingNodeCount();
     std::vector<AbsorbedEnergySpectrum> result(nodeCount, AbsorbedEnergySpectrum(nodeCount + 1));
@@ -17,7 +18,7 @@ std::vector<AbsorbedEnergySpectrum> Estimator::estimateAbsorption() {
         for (auto &p : prims)
             nodeSurfaceArea += p->Area();
 
-        std::cerr << "primitive " << scene->objects[i].name << " with Area " << nodeSurfaceArea << std::endl;
+        std::cerr << "Estimating node " << scene->objects[i].name << " with Area " << nodeSurfaceArea << std::endl;
 
         #pragma omp parallel for default(none) shared(prims, nodeCount, nodeSurfaceArea, nodeSpectrum, i, std::cerr)
         for (auto &prim : prims) {
@@ -37,16 +38,16 @@ std::vector<AbsorbedEnergySpectrum> Estimator::estimateAbsorption() {
                     for (int directionSamples = 0; directionSamples < M; directionSamples++) {
                         Float pdf;
                         Float3 directionSample = sampleHemisphereAtNormal(flipNormal ? -normal : normal, sampler, pdf, useUniformSampling);
-                        // TODO:
                         // the fraction of the emissive power at this point(directional emissive power represented by this ray) is cos theta
-                        Float cosTheta = std::abs(directionSample.dot(normal));
-                        Float intensity = useUniformSampling ? 1. : (cosTheta / M_PI) / pdf;
-                        Ray ray(primitiveSample, directionSample, 1.); // because we emit diffusely, the intensity is uniform
+                        // because we emit diffusely, the intensity is uniform per point and surface area. We later divide it by M direction and N surface samples.
+                        Ray ray(primitiveSample, directionSample, 1.);
                         HitRecord hitRecord{};
 
                         auto depth = traceDepth;
                         auto estimate = estimateAbsorptionAtRay(hitRecord, ray, depth);
                         primitiveSpectrum[estimate.first] += estimate.second;
+
+                        // rough criterion for self intersection
                         if (estimate.first == i) {
                             if (hitRecord.time < 0.00001)
                                 std::cerr << "self intersection with low hit time " << hitRecord.time
@@ -92,8 +93,6 @@ Estimator::estimateAbsorptionAtRay(HitRecord &hitRecord, Ray &ray, float &depth)
         case DIFFUSE_REFLECTION: {
             Float pdf = 1.;
             Float3 reflectedDirection = sampleHemisphereAtNormal(normal, sampler, pdf, false);
-            const Float diffuseScatterBRDF = M_1_PI;
-            const Float cosTheta = std::abs(reflectedDirection.dot(normal));
             ray = Ray(reflectPosition, reflectedDirection, ray.intensity);
             auto result = estimateAbsorptionAtRay(hitRecord, ray, depth);
             return  std::make_pair(result.first, result.second);

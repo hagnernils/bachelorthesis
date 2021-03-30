@@ -61,6 +61,7 @@ inline Float3 sampleTriangle2(const Float3 &a, const Float3 &b, const Float3 &c,
     return A * a + s * b + t * c;
 }
 
+// closest hit algorithm for a single triangle
 bool Primitive::hit(Ray &ray, Float tMin, Float tMax, HitRecord *hitRecord) const {
     Float u, v;
 
