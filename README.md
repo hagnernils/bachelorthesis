@@ -7,6 +7,7 @@ Using C++, CMake, and other cool stuff.
 ### libraries used
 - [Google Test](https://github.com/google/googletest)
 - [tinygltf](https://github.com/syoyo/tinygltf)
+- [Open MP](https://www.openmp.org/)
 
 
 ### algorithms implemented
